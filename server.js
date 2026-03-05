@@ -86,10 +86,11 @@ app.post('/send-otp', async (req, res) => {
             html: `<h1>Your OTP is: ${otp}</h1>`
         });
         res.status(200).send({ message: "OTP Sent!", success: true });
-   } catch (error) {
-        console.error("❌ NODEMAILER ERROR:", error); // <-- This prints the real error to Render!
+    } catch (error) {
+        console.error("❌ NODEMAILER ERROR:", error); 
         res.status(500).send({ message: "Failed to send", success: false });
     }
+});
 
 // --- 2. GENERATE THE JWT BADGE ON LOGIN ---
 app.post('/verify-otp', (req, res) => {
