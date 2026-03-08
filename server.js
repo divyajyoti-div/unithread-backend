@@ -1,5 +1,4 @@
 const express = require('express');
-const nodemailer = require('nodemailer');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Pool } = require('pg'); 
@@ -68,26 +67,40 @@ initDb();
 
 let otpStore = {}; 
 
+// --- BREVO API EMAIL ROUTE ---
 app.post('/send-otp', async (req, res) => {
     const { email } = req.body;
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    otpStore[email] = otp.toString();
-
-    let transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
-    });
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    otpStore[email] = otp;
 
     try {
-        await transporter.sendMail({
-            from: `"UniThread Admin" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: "Verification Code",
-            html: `<h1>Your OTP is: ${otp}</h1>`
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.BREVO_API_KEY,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: { 
+                    name: "UniThread Admin", 
+                    email: "mishradivyajyoti178@gmail.com" // <-- 🚨 CHANGE THIS TO YOUR BREVO EMAIL!
+                }, 
+                to: [{ email: email }], 
+                subject: "Your UniThread Verification Code",
+                htmlContent: `<h1>Your OTP is: ${otp}</h1>`
+            })
         });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("❌ BREVO ERROR:", errorData);
+            return res.status(500).send({ message: "Failed to send", success: false });
+        }
+
         res.status(200).send({ message: "OTP Sent!", success: true });
     } catch (error) {
-        console.error("❌ NODEMAILER ERROR:", error); 
+        console.error("❌ SERVER ERROR:", error); 
         res.status(500).send({ message: "Failed to send", success: false });
     }
 });
