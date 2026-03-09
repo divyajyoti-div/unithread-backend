@@ -84,7 +84,7 @@ app.post('/send-otp', async (req, res) => {
             body: JSON.stringify({
                 sender: { 
                     name: "UniThread Admin", 
-                    email: "mishradivyajyoti178@gmail.com" // <-- 🚨 CHANGE THIS TO YOUR BREVO EMAIL!
+                    email: "mishradivyajyoti178@gmail.com" 
                 }, 
                 to: [{ email: email }], 
                 subject: "Your UniThread Verification Code",
@@ -142,9 +142,12 @@ const authenticateToken = (req, res, next) => {
 // SECURE: Create Post
 app.post('/api/posts', authenticateToken, async (req, res) => {
     try {
-        const { title, content, image_data, author } = req.body;
+        const { title, content, image_data } = req.body; // 🚨 Removed 'author' from req.body
         let finalImageUrl = null;
-        const finalAuthor = author || 'u/Divyajyoti_mishra';
+        
+        // 🚨 NEW: Auto-generate author from their logged-in email
+        // Example: "john.doe@gmail.com" becomes "u/john.doe"
+        const finalAuthor = 'u/' + req.user.email.split('@')[0];
 
         if (image_data) {
             try {
@@ -193,8 +196,11 @@ app.delete('/api/posts/:id', authenticateToken, async (req, res) => {
 app.post('/api/posts/:id/comments', authenticateToken, async (req, res) => {
     try {
         const postId = req.params.id;
-        const { content, author } = req.body; 
-        const finalAuthor = author || 'u/Divyajyoti_mishra'; 
+        const { content } = req.body; // 🚨 Removed 'author' from req.body
+        
+        // 🚨 NEW: Auto-generate author for comments too
+        const finalAuthor = 'u/' + req.user.email.split('@')[0]; 
+
         const query = 'INSERT INTO comments (post_id, content, author) VALUES ($1, $2, $3) RETURNING *';
         const result = await pool.query(query, [postId, content, finalAuthor]);
         res.status(201).json({ success: true, comment: result.rows[0] });
