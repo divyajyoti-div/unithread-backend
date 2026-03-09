@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniThread | Your Campus, Your Voice</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-left">
+            <div id="menu-toggle" class="hamburger">
+                <span></span><span></span><span></span>
+            </div>
+            <div class="logo">Uni</span><span class="thread">Thread</span></div>
+        </div>
+        
+        <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search posts, departments, or clubs...">
+        </div>
+        
+        <div class="nav-actions">
+            <div class="notification-bell">
+                <span class="bell-icon">🔔</span>
+                <span class="notif-badge" id="notif-count">3</span>
+            </div>
+
+            <button id="create-post-btn" class="btn-primary">+ Create Post</button>
+
+            <div class="profile-icon" id="profile-btn">
+                <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" alt="Profile">
+            </div>
+
+            <div id="profile-dropdown" class="profile-dropdown">
+                <div class="dropdown-item" id="dropdown-login-btn">
+                    <span class="dropdown-icon">🔑</span> Log In or Sign Up
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-profile-header" id="view-profile-btn">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" alt="Avatar" class="dropdown-avatar">
+                    <div class="dropdown-profile-info">
+                        <strong>View Profile</strong>
+                        <span class="text-muted">u/Divyajyoti_mishra</span>
+                    </div>
+                </div>
+                <div class="dropdown-item"><span class="dropdown-icon">🏆</span> Achievements</div>
+                <div class="dropdown-item text-danger" id="dropdown-logout-btn">
+                    <span class="dropdown-icon">🚪</span> Log Out
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item"><span class="dropdown-icon">⚙️</span> Settings</div>
+            </div>
+        </div>
+    </header>
+
+    <aside id="side-drawer" class="side-drawer" style="overflow-y: auto; padding-bottom: 40px;">
+        <div class="drawer-content">
+            <h3>Departments</h3>
+            <ul class="category-list">
+                <li class="active">🏠 Home</li>
+                <li class="active">💻 BCA / IT</li>
+                <li>🏗️ Engineering</li>
+                <li>📊 MBA / Commerce</li>
+                <li>📚 Resource Vault (PDFs)</li>
+            </ul>
+            <hr style="border-color: var(--border-light); margin: 15px 0;">
+            <h3>Campus Life</h3>
+            <ul class="category-list">
+                <li>🍔 Canteen Reviews</li>
+                <li>📝 Exam Prep</li>
+                <li>🏀 Sports & Events</li>
+                <li>🔍 Lost & Found</li>
+                <li>💼 Placement Prep</li>
+            </ul>
+
+            <hr style="border-color: var(--border-light); margin: 25px 0 15px 0;">
+            
+            <div class="community-card" style="margin-bottom: 20px; background: rgba(0,0,0,0.15); padding: 15px; border-radius: 8px; border: 1px solid var(--border-light);">
+                <h4 style="margin-bottom: 10px; color: var(--text-main);">About Community</h4>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">Welcome to your official university forum. Discuss campus life, share resources, and stay anonymous.</p>
+                <div class="stats" style="display: flex; gap: 20px;">
+                    <div><b style="color: var(--text-main);">12k</b><br><span style="color: var(--text-muted); font-size: 0.75rem;">Students</span></div>
+                    <div><b style="color: #22c55e;">450</b><br><span style="color: var(--text-muted); font-size: 0.75rem;">Online</span></div>
+                </div>
+            </div>
+
+            <div class="trending-card" style="background: rgba(0,0,0,0.15); padding: 15px; border-radius: 8px; border: 1px solid var(--border-light);">
+                <h4 style="margin-bottom: 10px; color: var(--text-main);">Highest point Leaders</h4>
+                <ol style="color: var(--text-muted); font-size: 0.85rem; padding-left: 20px; margin: 0;">
+                    <li style="margin-bottom: 8px;"><span style="color: var(--text-main);">u/Divyajyoti_mishra</span> (+2500)</li>
+                    <li style="margin-bottom: 8px;"><span style="color: var(--text-main);">u/Admin_Helper</span> (+1800)</li>
+                    <li><span style="color: var(--text-main);">u/LateNightCoder</span> (+1200)</li>
+                </ol>
+            </div>
+        </div>
+    </aside>
+
+    <div class="container main-layout" style="display: flex; gap: 20px; padding-top: 90px; max-width: 1100px; margin: 0 auto; justify-content: center;">
+        
+        <div id="create-post-page" style="display: none; grid-column: 1 / -1; max-width: 800px; margin: 0 auto; width: 100%;">
+            <div class="create-header">
+                <h2>Create post</h2>
+                <span class="draft-link">Drafts</span>
+            </div>
+
+            <div class="post-profile-selector">
+                <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" alt="Avatar">
+                <span>u/Divyajyoti_mishra</span>
+                <span style="font-size: 0.8rem; margin-left: 5px;">▼</span>
+            </div>
+
+            <div class="editor-container">
+                <div class="editor-tabs">
+                    <button class="tab active" data-target="text-tab">Text</button>
+                    <button class="tab" data-target="media-tab">Images & Video</button>
+                    <button class="tab" data-target="link-tab">Link</button>
+                    <button class="tab" data-target="poll-tab">Poll</button>
+                </div>
+
+                <div class="editor-body">
+                    <input type="text" id="new-post-title" class="title-input" placeholder="Title*" maxlength="300">
+                    <div class="char-counter" id="title-counter">0/300</div>
+                    <button class="add-tags-btn">Add tags</button>
+
+                    <div id="text-tab" class="tab-content active">
+                        <div class="rich-toolbar">
+                            <button class="tool-btn" data-command="bold" title="Bold"><b>B</b></button>
+                            <button class="tool-btn" data-command="italic" title="Italic"><i>i</i></button>
+                            <button class="tool-btn" data-command="strikethrough" title="Strikethrough" style="text-decoration: line-through;">S</button>
+                            <button class="tool-btn" data-command="createLink" title="Insert Link">🔗</button>
+                            <div class="tool-divider"></div>
+                            <button class="tool-btn" data-command="insertUnorderedList" title="Bullet List"><b>⋮≡</b></button>
+                            <button class="tool-btn" data-command="insertOrderedList" title="Numbered List"><b>1.</b></button>
+                            <button class="tool-btn" data-command="formatBlock" data-value="blockquote" title="Quote"><b>”</b></button>
+                            <button class="tool-btn" data-command="formatBlock" data-value="pre" title="Code Block"><b>&lt;/&gt;</b></button>
+                        </div>
+                        <div id="editor-content" class="content-input rich-editor" contenteditable="true" placeholder="Text (optional)"></div>
+                    </div>
+
+                    <div id="media-tab" class="tab-content">
+                        <div class="upload-placeholder" id="upload-box">
+                            <span style="font-size: 2rem;">☁️</span>
+                            <p id="upload-text">Drag and drop images or videos here</p>
+                            <input type="file" id="real-file-input" accept="image/*,video/*" style="display: none;">
+                            <button class="btn-draft" id="custom-upload-btn">Upload</button>
+                        </div>
+                    </div>
+
+                    <div id="link-tab" class="tab-content">
+                        <input type="url" class="title-input" placeholder="URL" style="border-bottom: 1px solid var(--border-light); padding-bottom: 10px; margin-bottom: 15px;">
+                        <textarea class="content-input" placeholder="URL title (optional)" style="min-height: 100px;"></textarea>
+                    </div>
+
+                    <div id="poll-tab" class="tab-content">
+                        <input type="text" class="title-input" placeholder="Option 1" style="border: 1px solid var(--border-light); padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                        <input type="text" class="title-input" placeholder="Option 2" style="border: 1px solid var(--border-light); padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                        <button class="btn-draft" style="width: 100%;">+ Add Option</button>
+                    </div>
+                </div>
+
+                <div class="editor-footer" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding-top: 15px;">
+                    <label style="display: flex; align-items: center; gap: 8px; color: var(--text-main); cursor: pointer; font-size: 0.95rem;">
+                        <input type="checkbox" id="anon-checkbox" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-indigo);">
+                        🕵️ Post Anonymously
+                    </label>
+                    <div style="display: flex; gap: 10px; margin-left: auto;">
+                        <button class="btn-cancel" id="cancel-post-btn">Cancel</button>
+                        <button class="btn-draft" id="save-draft-btn">Save Draft</button>
+                        <button class="btn-post" id="publish-post-btn" disabled>Post</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="post-detail-page" style="display: none; grid-column: 1 / -1; max-width: 800px; margin: 0 auto; width: 100%; animation: fadeUp 0.3s ease;">
+            <button id="back-to-feed-btn" style="margin-bottom: 15px; padding: 8px 16px; border-radius: 20px; cursor: pointer; background: transparent; border: 1px solid var(--border-light); color: var(--text-main);">← Back to Feed</button>
+            <div id="single-post-container"></div>
+            
+            <div class="comments-section" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-light);">
+                <h3>Comments</h3>
+                
+                <label style="display: flex; align-items: center; gap: 8px; margin-top: 10px; color: var(--text-main); cursor: pointer; font-size: 0.85rem;">
+                    <input type="checkbox" id="anon-comment-checkbox" style="width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent-indigo);">
+                    🕵️ Comment Anonymously
+                </label>
+                
+                <div style="display: flex; gap: 10px; margin-top: 10px; margin-bottom: 20px;">
+                    <input type="text" id="new-comment-input" placeholder="What are your thoughts?" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border-light); background: var(--bg-dark); color: var(--text-main);">
+                    <button id="add-comment-btn" class="btn-primary" style="padding: 0 20px;">Comment</button>
+                </div>
+                
+                <div id="comments-list">
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">No comments yet. Be the first to share your thoughts!</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="edit-profile-page" style="display: none; grid-column: 1 / -1; max-width: 600px; margin: 0 auto; width: 100%; animation: fadeUp 0.3s ease;">
+            <button id="back-from-edit-btn" style="margin-bottom: 15px; padding: 8px 16px; border-radius: 20px; cursor: pointer; background: transparent; border: 1px solid var(--border-light); color: var(--text-main);">← Back</button>
+            
+            <div style="background: var(--bg-card); padding: 30px; border-radius: 8px; border: 1px solid var(--border-light);">
+                <h2 style="color: var(--text-main); margin-bottom: 20px; text-align: center;">Edit Profile</h2>
+                
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <img id="edit-avatar-preview" src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-indigo); margin-bottom: 15px;">
+                    <br>
+                    <input type="file" id="profile-pic-upload" accept="image/*" style="display: none;">
+                    <button class="btn-draft" onclick="document.getElementById('profile-pic-upload').click()">📷 Change Picture</button>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 5px;">Course</label>
+                    <input type="text" id="edit-course-input" style="width: 100%; padding: 10px; border-radius: 4px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-light);">
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 5px;">Year</label>
+                    <input type="text" id="edit-year-input" style="width: 100%; padding: 10px; border-radius: 4px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-light);">
+                </div>
+
+                <button id="save-full-profile-btn" class="btn-primary" style="width: 100%; padding: 12px; border-radius: 4px; border: none; cursor: pointer;">Save Changes</button>
+            </div>
+        </div>
+
+        <main class="feed" style="flex: 1; max-width: 700px;">
+            <div class="feed-sort">
+                <button class="active">Hot</button>
+                <button>New</button>
+                <button>Top</button>
+            </div>
+        </main>
+    </div>
+
+    <div id="auth-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content auth-card">
+            <h2 id="auth-title" style="margin-bottom: 10px;">Join UniThread</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Enter your university email to continue.</p>
+            
+            <div class="input-group" style="display: flex; gap: 10px;">
+                <input type="email" id="user-email" placeholder="student@youruniversity.edu" style="flex: 1; margin: 0; padding: 10px; border-radius: 4px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-light);">
+                <button id="send-otp" class="btn-primary">Send OTP</button>
+            </div>
+            
+            <div id="otp-section" style="display:none; margin-top: 20px;">
+                <input type="text" id="otp-code" placeholder="Enter 6-digit OTP" maxlength="6" style="width: 100%; padding: 10px; border-radius: 4px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-light);">
+                <button id="verify-btn" class="btn-primary" style="width: 100%; margin-top: 10px; padding: 12px;">Verify & Enter</button>
+            </div>
+
+            <div id="profile-setup-section" style="display: none; margin-top: 20px; border-top: 1px solid var(--border-light); padding-top: 20px;">
+                <h3 style="color: var(--text-main); margin-bottom: 10px;">Step 3: Complete Profile</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Create your identity to join the waitlist.</p>
+
+                <label style="color: var(--text-main); font-size: 0.9rem; display: block; margin-bottom: 5px;">Username</label>
+                <input type="text" id="setup-username" placeholder="e.g. u/hacker99" style="width: 100%; padding: 10px; border-radius: 4px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-light); margin-bottom: 15px;">
+
+                <label style="color: var(--text-main); font-size: 0.9rem; display: block; margin-bottom: 5px;">Course / Major</label>
+                <input type="text" id="setup-course" placeholder="e.g. BCA / Computer Science" style="width: 100%; padding: 10px; border-radius: 4px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-light); margin-bottom: 15px;">
+
+                <label style="color: var(--text-main); font-size: 0.9rem; display: block; margin-bottom: 5px;">Year</label>
+                <input type="text" id="setup-year" placeholder="e.g. 1st Year" style="width: 100%; padding: 10px; border-radius: 4px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-light); margin-bottom: 20px;">
+
+                <button id="submit-profile-btn" class="btn-primary" style="width: 100%; padding: 12px;">Submit Application</button>
+            </div>
+
+            <p class="small-text" style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 20px;">Only verified university domains are allowed.</p>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content profile-card">
+            <button class="btn-close" style="position: absolute; top: 15px; right: 20px; background: transparent; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer;">&times;</button>
+            <div class="profile-header">
+                <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" alt="Profile Picture" class="profile-large-avatar">
+                <h2 class="profile-username">u/Divyajyoti_mishra</h2>
+                <p class="profile-email">codewizard@university.edu</p>
+                <span class="tag" style="margin-top: 10px; display: inline-block;">Verified Student ✓</span>
+            </div>
+            <div class="profile-details">
+                <div class="detail-item"><span class="detail-label">Course</span><span class="detail-value" id="user-course">BCA / IT</span></div>
+                <div class="detail-item"><span class="detail-label">Year</span><span class="detail-value" id="user-year">3rd Year</span></div>
+                <div class="detail-item"><span class="detail-label">Total points</span><span class="detail-value">2,500</span></div>
+                <div class="detail-item"><span class="detail-label">Joined</span><span class="detail-value">Aug 2023</span></div>
+            </div>
+            <div class="modal-actions" style="margin-top: 25px; display: flex; gap: 10px; width: 100%;">
+                <button id="edit-profile-btn" class="btn-draft" style="flex: 1;"><span style="margin-right: 5px;">👕</span> Edit your profile</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="drafts-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content auth-card" style="max-width: 600px;">
+            <button id="close-drafts-btn" class="btn-close" style="position: absolute; top: 15px; right: 20px; background: transparent; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer;">&times;</button>
+            <h2 style="margin-bottom: 20px; color: var(--text-main);">Your Saved Drafts</h2>
+            
+            <div id="drafts-list-container" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

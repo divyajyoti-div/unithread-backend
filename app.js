@@ -485,7 +485,14 @@ sendOtpBtn.addEventListener('click', async () => {
     }
 });
 
-// 🚨 NEW: Updated Verify button to store the user's email locally
+// --- 🚨 UPGRADED VERIFY OTP (Checks Guest List) ---
+const profileSetupSection = document.getElementById('profile-setup-section');
+const setupUsernameInput = document.getElementById('setup-username');
+const setupCourseInput = document.getElementById('setup-course');
+const setupYearInput = document.getElementById('setup-year');
+const submitProfileBtn = document.getElementById('submit-profile-btn');
+let tempRegistrationEmail = ""; // Remembers email for the final step
+
 verifyBtn.addEventListener('click', async () => {
     const email = userEmailInput.value;
     const otp = otpInput.value;
@@ -496,25 +503,86 @@ verifyBtn.addEventListener('click', async () => {
             body: JSON.stringify({ email, otp })
         });
         const result = await response.json();
+
+        // If they are pending approval, stop them here!
+        if (response.status === 403) {
+            alert("⏳ " + result.message);
+            return;
+        }
+
         if (result.success) {
-            alert("🎉 Verification Successful! You are now logged in.");
-            authModal.style.display = 'none';
-            localStorage.setItem('isLoggedIn', 'true'); 
-            
-            // 🛡️ SECURITY: Save the cryptographic badge to the browser!
-            localStorage.setItem('uniToken', result.token); 
-            
-            // 🚨 NEW: Save the email and instantly update the UI!
-            localStorage.setItem('userEmail', email);
-            updateProfileUI();
-            
+            if (result.isNewUser) {
+                // Not in database! Show the Profile Setup form
+                alert("OTP Verified! Please create your profile to join the waitlist.");
+                otpSection.style.display = 'none';
+                profileSetupSection.style.display = 'block';
+                tempRegistrationEmail = result.email; 
+            } else {
+                // Fully Approved! Let them in.
+                alert("🎉 Welcome back! You are logged in.");
+                authModal.style.display = 'none';
+                localStorage.setItem('isLoggedIn', 'true'); 
+                localStorage.setItem('uniToken', result.token); 
+                localStorage.setItem('userEmail', email);
+                updateProfileUI();
+                window.location.reload(); // Refresh to load posts safely
+            }
         } else {
-            alert("❌ Invalid OTP. Please try again.");
+            alert("❌ " + result.message);
         }
     } catch (error) {
         alert("Error verifying OTP.");
     }
 });
+
+// --- 🚨 NEW: SUBMIT PROFILE TO WAITLIST ---
+if (submitProfileBtn) {
+    submitProfileBtn.addEventListener('click', async () => {
+        const username = setupUsernameInput.value.trim();
+        const course = setupCourseInput.value.trim();
+        const year = setupYearInput.value.trim();
+
+        if (!username || !course || !year) {
+            alert("Please fill in all fields!");
+            return;
+        }
+
+        submitProfileBtn.innerText = "Submitting...";
+        submitProfileBtn.disabled = true;
+
+        try {
+            const response = await fetch('https://unithread-backend.onrender.com/api/setup-profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: tempRegistrationEmail,
+                    username: username,
+                    course: course,
+                    year: year
+                })
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                alert("✅ Application submitted! Please wait for the Admin to approve your account.");
+                authModal.style.display = 'none';
+                profileSetupSection.style.display = 'none'; // Hide for next time
+                
+                // Save their entered profile locally so it looks nice when they finally get in
+                const updatedProfile = { course: course, year: year, avatar: '' };
+                localStorage.setItem('uniProfile', JSON.stringify(updatedProfile));
+
+            } else {
+                alert("❌ " + result.message);
+            }
+        } catch (error) {
+            alert("Error submitting profile.");
+        } finally {
+            submitProfileBtn.innerText = "Submit Application";
+            submitProfileBtn.disabled = false;
+        }
+    });
+}
 
 // ==========================================
 // --- 4. EDIT PROFILE LOGIC ---

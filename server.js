@@ -31,13 +31,25 @@ pool.connect()
     .catch((err) => console.error("❌ Postgres Connection Error:", err.message));
 
 const initDb = async () => {
+    // 🚨 NEW: Create the Guest List (Users Table)
+    const createUsersQuery = `
+        CREATE TABLE IF NOT EXISTS users (
+            email TEXT PRIMARY KEY,
+            username TEXT UNIQUE NOT NULL,
+            course TEXT,
+            year TEXT,
+            status TEXT DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    `;
+
     const createPostsQuery = `
         CREATE TABLE IF NOT EXISTS posts (
             id SERIAL PRIMARY KEY,
             title TEXT NOT NULL,
             content TEXT,
             image_data TEXT, 
-            author TEXT DEFAULT 'u/Divyajyoti_mishra',
+            author TEXT DEFAULT 'u/Anonymous',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     `;
@@ -47,16 +59,17 @@ const initDb = async () => {
             id SERIAL PRIMARY KEY,
             post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
             content TEXT NOT NULL,
-            author TEXT DEFAULT 'u/Student',
+            author TEXT DEFAULT 'u/Anonymous',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     `;
 
     try {
+        await pool.query(createUsersQuery); // Initialize users table
         await pool.query(createPostsQuery);
         await pool.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS image_data TEXT;`).catch(()=>console.log("Image column exists"));
         await pool.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS score INTEGER DEFAULT 1;`).catch(()=>console.log("Score column exists"));
-        await pool.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS author TEXT DEFAULT 'u/Divyajyoti_mishra';`).catch(()=>console.log("Author column exists"));
+        await pool.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS author TEXT DEFAULT 'u/Anonymous';`).catch(()=>console.log("Author column exists"));
         await pool.query(createCommentsQuery);
         console.log("✅ Database tables verified.");
     } catch (err) {
@@ -105,32 +118,69 @@ app.post('/send-otp', async (req, res) => {
     }
 });
 
-// --- 2. GENERATE THE JWT BADGE ON LOGIN ---
-app.post('/verify-otp', (req, res) => {
+// --- 2. UPGRADED: VERIFY OTP & CHECK GUEST LIST ---
+app.post('/verify-otp', async (req, res) => {
     const { email, otp } = req.body;
+    
     if (otpStore[email] && otpStore[email] === otp) {
         delete otpStore[email]; 
         
-        // Create the JWT Badge valid for 24 hours
-        const token = jwt.sign({ email: email }, JWT_SECRET, { expiresIn: '24h' });
-        
-        // Send the token back to the frontend
-        res.status(200).send({ success: true, message: "Verified!", token: token });
+        try {
+            // Check if they are on the Guest List
+            const userResult = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+            const user = userResult.rows[0];
+
+            if (!user) {
+                // Not on the list! Tell the frontend to show the "Setup Profile" form
+                return res.status(200).send({ success: true, isNewUser: true, email: email, message: "Please complete your profile setup." });
+            } else if (user.status === 'pending') {
+                // On the list, but not approved yet
+                return res.status(403).send({ success: false, message: "Application submitted! Waiting for Admin approval." });
+            } else if (user.status === 'approved') {
+                // Fully approved! Give them the JWT Badge (now containing their official username)
+                const token = jwt.sign({ email: email, username: user.username }, JWT_SECRET, { expiresIn: '24h' });
+                return res.status(200).send({ success: true, isNewUser: false, token: token, message: "Verified!" });
+            }
+        } catch (dbError) {
+            console.error("Database error during login:", dbError);
+            return res.status(500).send({ success: false, message: "Server error checking user status." });
+        }
     } else {
         res.status(400).send({ success: false, message: "Invalid OTP" });
     }
 });
 
-// --- 3. THE SECURITY GUARD MIDDLEWARE ---
+// --- 3. NEW: SAVE PROFILE & SET TO PENDING ---
+app.post('/api/setup-profile', async (req, res) => {
+    const { email, username, course, year } = req.body;
+    try {
+        // Automatically add u/ to the start if they forgot
+        const formattedUsername = username.startsWith('u/') ? username : 'u/' + username;
+
+        const query = 'INSERT INTO users (email, username, course, year, status) VALUES ($1, $2, $3, $4, $5) RETURNING *';
+        await pool.query(query, [email, formattedUsername, course, year, 'pending']);
+
+        res.status(200).send({ success: true, message: "Profile submitted! Waiting for admin approval." });
+    } catch (error) {
+        console.error("Error setting up profile:", error);
+        // Postgres error code 23505 means "Unique Violation" (Username already taken)
+        if (error.code === '23505') {
+            return res.status(400).send({ success: false, message: "Username is already taken! Please choose another." });
+        }
+        res.status(500).send({ success: false, message: "Server Error" });
+    }
+});
+
+// --- 4. THE SECURITY GUARD MIDDLEWARE ---
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Extract token from "Bearer <token>"
+    const token = authHeader && authHeader.split(' ')[1]; 
     
     if (!token) return res.status(401).json({ success: false, message: "Access Denied: No Token Provided!" });
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) return res.status(403).json({ success: false, message: "Access Denied: Invalid or Expired Token!" });
-        req.user = user; // Badge is valid! Let them through.
+        req.user = user; 
         next();
     });
 };
@@ -142,12 +192,11 @@ const authenticateToken = (req, res, next) => {
 // SECURE: Create Post
 app.post('/api/posts', authenticateToken, async (req, res) => {
     try {
-        const { title, content, image_data } = req.body; // 🚨 Removed 'author' from req.body
+        const { title, content, image_data } = req.body;
         let finalImageUrl = null;
         
-        // 🚨 NEW: Auto-generate author from their logged-in email
-        // Example: "john.doe@gmail.com" becomes "u/john.doe"
-        const finalAuthor = 'u/' + req.user.email.split('@')[0];
+        // 🚨 NEW: Pull their official username securely from the JWT badge!
+        const finalAuthor = req.user.username;
 
         if (image_data) {
             try {
@@ -196,10 +245,10 @@ app.delete('/api/posts/:id', authenticateToken, async (req, res) => {
 app.post('/api/posts/:id/comments', authenticateToken, async (req, res) => {
     try {
         const postId = req.params.id;
-        const { content } = req.body; // 🚨 Removed 'author' from req.body
+        const { content } = req.body; 
         
-        // 🚨 NEW: Auto-generate author for comments too
-        const finalAuthor = 'u/' + req.user.email.split('@')[0]; 
+        // 🚨 NEW: Pull their official username securely from the JWT badge!
+        const finalAuthor = req.user.username; 
 
         const query = 'INSERT INTO comments (post_id, content, author) VALUES ($1, $2, $3) RETURNING *';
         const result = await pool.query(query, [postId, content, finalAuthor]);
