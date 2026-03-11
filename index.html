@@ -13,7 +13,7 @@
             <div id="menu-toggle" class="hamburger">
                 <span></span><span></span><span></span>
             </div>
-            <div class="logo">Uni</span><span class="thread">Thread</span></div>
+            <div class="logo">Uni<span class="thread">Thread</span></div>
         </div>
         
         <div class="search-bar">
@@ -38,6 +38,10 @@
                     <span class="dropdown-icon">🔑</span> Log In or Sign Up
                 </div>
                 <div class="dropdown-divider"></div>
+                
+                <div class="dropdown-item" id="admin-panel-btn" style="display: none;">
+                    <span class="dropdown-icon">🛡️</span> Admin Panel
+                </div>
                 <div class="dropdown-profile-header" id="view-profile-btn">
                     <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" alt="Avatar" class="dropdown-avatar">
                     <div class="dropdown-profile-info">
@@ -295,6 +299,18 @@
             <h2 style="margin-bottom: 20px; color: var(--text-main);">Your Saved Drafts</h2>
             
             <div id="drafts-list-container" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content auth-card" style="max-width: 600px;">
+            <button class="btn-close" id="close-admin-btn" style="position: absolute; top: 15px; right: 20px; background: transparent; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer;">&times;</button>
+            <h2 style="margin-bottom: 20px; color: var(--text-main);">🛡️ Admin Dashboard</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Review pending student applications.</p>
+            
+            <div id="pending-users-list" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                <p style="color: var(--text-muted);">Loading applications...</p>
             </div>
         </div>
     </div>

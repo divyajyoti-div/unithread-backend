@@ -40,25 +40,37 @@ const toBase64 = file => new Promise((resolve, reject) => {
 });
 
 // 🚨 NEW: Function to update the UI with the logged-in user's name
+// 🚨 UPGRADED: Read the real username directly from the secure VIP Badge (JWT)
 function updateProfileUI() {
+    const token = localStorage.getItem('uniToken');
     const savedEmail = localStorage.getItem('userEmail');
-    if (savedEmail) {
-        // Create a username from the email (e.g., john.doe@uni.edu -> u/john.doe)
-        const username = 'u/' + savedEmail.split('@')[0];
-        
-        // Update the dropdown profile text if it exists
-        const profileMuted = document.querySelector('.dropdown-profile-info .text-muted');
-        if (profileMuted) profileMuted.innerText = username;
-        
-        const profileMain = document.querySelector('.dropdown-profile-info h4');
-        if (profileMain) profileMain.innerText = savedEmail.split('@')[0];
 
-        // Update any generic profile name placeholders on the page
-        const otherProfileNames = document.querySelectorAll('#profile-name, .user-display-name');
-        otherProfileNames.forEach(el => el.innerText = username);
+    if (token && savedEmail) {
+        try {
+            // Decode the VIP Badge to get the real database username!
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const realUsername = payload.username || 'u/' + savedEmail.split('@')[0];
+            
+            // Update the dropdown profile text
+            const profileMuted = document.querySelector('.dropdown-profile-info .text-muted');
+            if (profileMuted) profileMuted.innerText = realUsername;
+            
+            const profileMain = document.querySelector('.dropdown-profile-info h4');
+            if (profileMain) profileMain.innerText = realUsername.replace('u/', '');
+
+            // Update all generic profile name placeholders on the page
+            const otherProfileNames = document.querySelectorAll('#profile-name, .user-display-name, .profile-username');
+            otherProfileNames.forEach(el => el.innerText = realUsername);
+
+            // Update the email in the profile modal
+            const profileEmailText = document.querySelector('.profile-email');
+            if (profileEmailText) profileEmailText.innerText = savedEmail;
+
+        } catch (error) {
+            console.error("Error reading badge data", error);
+        }
     }
 }
-
 async function loadAllPosts() {
     try {
         const response = await fetch('https://unithread-backend.onrender.com/api/posts?t=' + new Date().getTime());
@@ -512,12 +524,18 @@ verifyBtn.addEventListener('click', async () => {
 
         if (result.success) {
             if (result.isNewUser) {
-                // Not in database! Show the Profile Setup form
-                alert("OTP Verified! Please create your profile to join the waitlist.");
-                otpSection.style.display = 'none';
-                profileSetupSection.style.display = 'block';
-                tempRegistrationEmail = result.email; 
-            } else {
+            alert("OTP Verified! Please create your profile to join the waitlist.");
+            
+            // 🚨 VISUAL FIX: Hide the Email and OTP sections!
+            document.querySelector('.input-group').style.display = 'none'; 
+            otpSection.style.display = 'none'; 
+            document.querySelector('.auth-card > p').style.display = 'none';
+            document.getElementById('auth-title').innerText = "Create Your Identity";
+            
+            // Show the Profile Setup
+            profileSetupSection.style.display = 'block';
+            tempRegistrationEmail = result.email; 
+        } else {
                 // Fully Approved! Let them in.
                 alert("🎉 Welcome back! You are logged in.");
                 authModal.style.display = 'none';
@@ -770,5 +788,114 @@ if (draftsListContainer) {
 if (closeDraftsBtn) {
     closeDraftsBtn.addEventListener('click', () => {
         draftsModal.style.display = 'none';
+    });
+}
+// ==========================================
+// --- 🛡️ SECRET ADMIN DASHBOARD LOGIC ---
+// ==========================================
+const adminPanelBtn = document.getElementById('admin-panel-btn');
+const adminModal = document.getElementById('admin-modal');
+const closeAdminBtn = document.getElementById('close-admin-btn');
+const pendingUsersList = document.getElementById('pending-users-list');
+
+if (adminPanelBtn) {
+    adminPanelBtn.addEventListener('click', () => {
+        const profileDropdown = document.getElementById('profile-dropdown');
+        if (profileDropdown) profileDropdown.classList.remove('show');
+        adminModal.style.display = 'flex';
+        loadPendingUsers();
+    });
+}
+
+if (closeAdminBtn) {
+    closeAdminBtn.addEventListener('click', () => {
+        adminModal.style.display = 'none';
+    });
+}
+
+// Fetch pending users from the server
+async function loadPendingUsers() {
+    if (!pendingUsersList) return;
+    pendingUsersList.innerHTML = '<p style="color: var(--text-muted);">Loading...</p>';
+    
+    const myToken = localStorage.getItem('uniToken');
+    try {
+        const response = await fetch('https://unithread-backend.onrender.com/api/admin/pending', {
+            headers: { 'Authorization': `Bearer ${myToken}` }
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            if (data.users.length === 0) {
+                pendingUsersList.innerHTML = '<p style="color: #22c55e; font-weight: 500;">✅ All caught up! No pending applications.</p>';
+                return;
+            }
+            
+            pendingUsersList.innerHTML = '';
+            data.users.forEach(user => {
+                const dateApplied = new Date(user.created_at).toLocaleDateString();
+                const userCard = `
+                    <div style="background: var(--bg-dark); padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center;">
+                        <div style="flex: 1; padding-right: 15px; overflow: hidden;">
+                            <h4 style="color: var(--text-main); margin-bottom: 5px;">${user.username}</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">${user.email}</p>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">${user.course} | ${user.year} | Applied: ${dateApplied}</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-direction: column;">
+                            <button class="btn-primary approve-btn" data-email="${user.email}" style="padding: 6px 12px; font-size: 0.85rem; background: #22c55e; border-color: #22c55e;">Approve</button>
+                            <button class="btn-cancel reject-btn" data-email="${user.email}" style="padding: 6px 12px; font-size: 0.85rem; color: #ef4444; border-color: #ef4444;">Reject</button>
+                        </div>
+                    </div>
+                `;
+                pendingUsersList.insertAdjacentHTML('beforeend', userCard);
+            });
+        } else {
+            pendingUsersList.innerHTML = `<p style="color: #ef4444;">${data.message}</p>`;
+        }
+    } catch (error) {
+        pendingUsersList.innerHTML = '<p style="color: #ef4444;">Failed to load applications.</p>';
+    }
+}
+
+// Handle Approve / Reject Clicks
+if (pendingUsersList) {
+    pendingUsersList.addEventListener('click', async (e) => {
+        const approveBtn = e.target.closest('.approve-btn');
+        const rejectBtn = e.target.closest('.reject-btn');
+        const myToken = localStorage.getItem('uniToken');
+
+        if (approveBtn || rejectBtn) {
+            const action = approveBtn ? 'approved' : 'rejected';
+            const email = (approveBtn || rejectBtn).getAttribute('data-email');
+            
+            const btn = approveBtn || rejectBtn;
+            const originalText = btn.innerText;
+            btn.innerText = "...";
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('https://unithread-backend.onrender.com/api/admin/moderate', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${myToken}`
+                    },
+                    body: JSON.stringify({ email, action })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    loadPendingUsers(); // Reload the list instantly!
+                } else {
+                    alert("Failed: " + data.message);
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                alert("Error processing request.");
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
     });
 }
