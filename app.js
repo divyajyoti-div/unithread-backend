@@ -41,13 +41,14 @@ const toBase64 = file => new Promise((resolve, reject) => {
 
 // 🚨 NEW: Function to update the UI with the logged-in user's name
 // 🚨 UPGRADED: Read the real username directly from the secure VIP Badge (JWT)
+// 🚨 UPGRADED: Read the real username and check for Admin!
 function updateProfileUI() {
     const token = localStorage.getItem('uniToken');
     const savedEmail = localStorage.getItem('userEmail');
 
     if (token && savedEmail) {
         try {
-            // Decode the VIP Badge to get the real database username!
+            // Decode the VIP Badge to get the real database username
             const payload = JSON.parse(atob(token.split('.')[1]));
             const realUsername = payload.username || 'u/' + savedEmail.split('@')[0];
             
@@ -65,6 +66,15 @@ function updateProfileUI() {
             // Update the email in the profile modal
             const profileEmailText = document.querySelector('.profile-email');
             if (profileEmailText) profileEmailText.innerText = savedEmail;
+
+            // 👑 THE ADMIN CHECK: Unhide the Admin Panel button if it's you!
+            // Make sure this email EXACTLY matches the one you log in with!
+            if (savedEmail.toLowerCase() === "mishradivyajyoti178@gmail.com") {
+                const adminBtn = document.getElementById('admin-panel-btn');
+                if (adminBtn) {
+                    adminBtn.style.display = 'block'; // Unhide the button!
+                }
+            }
 
         } catch (error) {
             console.error("Error reading badge data", error);
