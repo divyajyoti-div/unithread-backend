@@ -39,48 +39,54 @@ const toBase64 = file => new Promise((resolve, reject) => {
     reader.onerror = error => reject(error);
 });
 
-// 🚨 NEW: Function to update the UI with the logged-in user's name
-// 🚨 UPGRADED: Read the real username directly from the secure VIP Badge (JWT)
-// 🚨 UPGRADED: Read the real username and check for Admin!
+// 🚨 BULLETPROOF VERSION with Debug Logs
 function updateProfileUI() {
     const token = localStorage.getItem('uniToken');
     const savedEmail = localStorage.getItem('userEmail');
 
+    console.log("🛠️ DEBUG: UI Update Started!");
+    console.log("🛠️ DEBUG: Email in memory ->", savedEmail);
+    console.log("🛠️ DEBUG: Token in memory ->", !!token);
+
+    // 👑 THE ADMIN CHECK (Moved outside so it can't crash!)
+    if (savedEmail) {
+        if (savedEmail.trim().toLowerCase() === "mishradivyajyoti178@gmail.com") {
+            console.log("🛠️ DEBUG: ADMIN DETECTED! Unhiding button...");
+            const adminBtn = document.getElementById('admin-panel-btn');
+            if (adminBtn) {
+                adminBtn.style.display = 'block';
+            } else {
+                console.log("❌ ERROR: The admin button HTML is missing!");
+            }
+        } else {
+            console.log("🛠️ DEBUG: User is not admin.");
+        }
+    }
+
+    // Now update the usernames
     if (token && savedEmail) {
         try {
-            // Decode the VIP Badge to get the real database username
             const payload = JSON.parse(atob(token.split('.')[1]));
             const realUsername = payload.username || 'u/' + savedEmail.split('@')[0];
             
-            // Update the dropdown profile text
             const profileMuted = document.querySelector('.dropdown-profile-info .text-muted');
             if (profileMuted) profileMuted.innerText = realUsername;
             
             const profileMain = document.querySelector('.dropdown-profile-info h4');
             if (profileMain) profileMain.innerText = realUsername.replace('u/', '');
 
-            // Update all generic profile name placeholders on the page
             const otherProfileNames = document.querySelectorAll('#profile-name, .user-display-name, .profile-username');
             otherProfileNames.forEach(el => el.innerText = realUsername);
 
-            // Update the email in the profile modal
             const profileEmailText = document.querySelector('.profile-email');
             if (profileEmailText) profileEmailText.innerText = savedEmail;
 
-            // 👑 THE ADMIN CHECK: Unhide the Admin Panel button if it's you!
-            // Make sure this email EXACTLY matches the one you log in with!
-            if (savedEmail.toLowerCase() === "mishradivyajyoti178@gmail.com") {
-                const adminBtn = document.getElementById('admin-panel-btn');
-                if (adminBtn) {
-                    adminBtn.style.display = 'block'; // Unhide the button!
-                }
-            }
-
         } catch (error) {
-            console.error("Error reading badge data", error);
+            console.error("❌ ERROR decoding token. You might have an old invalid session!", error);
         }
     }
 }
+
 async function loadAllPosts() {
     try {
         const response = await fetch('https://unithread-backend.onrender.com/api/posts?t=' + new Date().getTime());
@@ -149,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isLoggedIn !== 'true') {
         setTimeout(() => authModal.style.display = 'flex', 500);
     } else {
-        updateProfileUI(); // 🚨 NEW: Update the names on the screen if already logged in!
+        updateProfileUI(); 
     }
     loadAllPosts();
 });
@@ -176,7 +182,6 @@ publishBtn.addEventListener('click', async () => {
     publishBtn.innerText = "Publishing...";
     publishBtn.disabled = true;
 
-    // 🛡️ SECURITY: Get the badge!
     const myToken = localStorage.getItem('uniToken');
 
     try {
@@ -195,7 +200,6 @@ publishBtn.addEventListener('click', async () => {
                 title: title, 
                 content: content, 
                 image_data: base64Image
-                // Author is now securely handled entirely by the backend!
             })
         });
 
@@ -254,7 +258,6 @@ addCommentBtn.addEventListener('click', async () => {
     addCommentBtn.innerText = "Posting...";
     addCommentBtn.disabled = true;
     
-    // 🛡️ SECURITY: Get the badge!
     const myToken = localStorage.getItem('uniToken');
 
     try {
@@ -264,7 +267,7 @@ addCommentBtn.addEventListener('click', async () => {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${myToken}` 
             },
-            body: JSON.stringify({ content: content }) // Author handled by backend
+            body: JSON.stringify({ content: content }) 
         });
 
         const data = await response.json();
@@ -289,7 +292,6 @@ mainFeed.addEventListener('click', async (e) => {
         const postId = postCard.getAttribute('data-id'); 
         if (confirm("Are you sure you want to delete this post?")) {
             
-            // 🛡️ SECURITY: Get the badge!
             const myToken = localStorage.getItem('uniToken');
             
             try {
@@ -341,7 +343,7 @@ dropdownLoginBtn.addEventListener('click', () => { profileDropdown.classList.rem
 dropdownLogoutBtn.addEventListener('click', () => { 
     localStorage.removeItem('isLoggedIn'); 
     localStorage.removeItem('uniToken'); 
-    localStorage.removeItem('userEmail'); // 🚨 Clear email on logout
+    localStorage.removeItem('userEmail'); 
     window.location.reload(); 
 });
 
@@ -428,7 +430,6 @@ document.body.addEventListener('click', async (e) => {
     const originalScore = scoreSpan.innerText;
     scoreSpan.innerText = "...";
 
-    // 🛡️ SECURITY: Get the badge!
     const myToken = localStorage.getItem('uniToken');
 
     try {
@@ -507,13 +508,12 @@ sendOtpBtn.addEventListener('click', async () => {
     }
 });
 
-// --- 🚨 UPGRADED VERIFY OTP (Checks Guest List) ---
 const profileSetupSection = document.getElementById('profile-setup-section');
 const setupUsernameInput = document.getElementById('setup-username');
 const setupCourseInput = document.getElementById('setup-course');
 const setupYearInput = document.getElementById('setup-year');
 const submitProfileBtn = document.getElementById('submit-profile-btn');
-let tempRegistrationEmail = ""; // Remembers email for the final step
+let tempRegistrationEmail = ""; 
 
 verifyBtn.addEventListener('click', async () => {
     const email = userEmailInput.value;
@@ -526,7 +526,6 @@ verifyBtn.addEventListener('click', async () => {
         });
         const result = await response.json();
 
-        // If they are pending approval, stop them here!
         if (response.status === 403) {
             alert("⏳ " + result.message);
             return;
@@ -536,24 +535,21 @@ verifyBtn.addEventListener('click', async () => {
             if (result.isNewUser) {
             alert("OTP Verified! Please create your profile to join the waitlist.");
             
-            // 🚨 VISUAL FIX: Hide the Email and OTP sections!
             document.querySelector('.input-group').style.display = 'none'; 
             otpSection.style.display = 'none'; 
             document.querySelector('.auth-card > p').style.display = 'none';
             document.getElementById('auth-title').innerText = "Create Your Identity";
             
-            // Show the Profile Setup
             profileSetupSection.style.display = 'block';
             tempRegistrationEmail = result.email; 
         } else {
-                // Fully Approved! Let them in.
                 alert("🎉 Welcome back! You are logged in.");
                 authModal.style.display = 'none';
                 localStorage.setItem('isLoggedIn', 'true'); 
                 localStorage.setItem('uniToken', result.token); 
                 localStorage.setItem('userEmail', email);
                 updateProfileUI();
-                window.location.reload(); // Refresh to load posts safely
+                window.location.reload(); 
             }
         } else {
             alert("❌ " + result.message);
@@ -563,7 +559,6 @@ verifyBtn.addEventListener('click', async () => {
     }
 });
 
-// --- 🚨 NEW: SUBMIT PROFILE TO WAITLIST ---
 if (submitProfileBtn) {
     submitProfileBtn.addEventListener('click', async () => {
         const username = setupUsernameInput.value.trim();
@@ -594,9 +589,8 @@ if (submitProfileBtn) {
             if (result.success) {
                 alert("✅ Application submitted! Please wait for the Admin to approve your account.");
                 authModal.style.display = 'none';
-                profileSetupSection.style.display = 'none'; // Hide for next time
+                profileSetupSection.style.display = 'none'; 
                 
-                // Save their entered profile locally so it looks nice when they finally get in
                 const updatedProfile = { course: course, year: year, avatar: '' };
                 localStorage.setItem('uniProfile', JSON.stringify(updatedProfile));
 
@@ -823,7 +817,6 @@ if (closeAdminBtn) {
     });
 }
 
-// Fetch pending users from the server
 async function loadPendingUsers() {
     if (!pendingUsersList) return;
     pendingUsersList.innerHTML = '<p style="color: var(--text-muted);">Loading...</p>';
@@ -867,7 +860,6 @@ async function loadPendingUsers() {
     }
 }
 
-// Handle Approve / Reject Clicks
 if (pendingUsersList) {
     pendingUsersList.addEventListener('click', async (e) => {
         const approveBtn = e.target.closest('.approve-btn');
@@ -895,7 +887,7 @@ if (pendingUsersList) {
                 const data = await response.json();
                 
                 if (data.success) {
-                    loadPendingUsers(); // Reload the list instantly!
+                    loadPendingUsers(); 
                 } else {
                     alert("Failed: " + data.message);
                     btn.innerText = originalText;
