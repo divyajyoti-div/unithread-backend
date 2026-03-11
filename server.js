@@ -184,6 +184,54 @@ const authenticateToken = (req, res, next) => {
         next();
     });
 };
+// --- ADMIN SECURITY GUARD ---
+// This checks if the logged-in user is YOU before letting them do admin stuff!
+const requireAdmin = (req, res, next) => {
+    const adminEmail = "mishradivyajyoti178@gmail.com"; // 🚨 Change this if you use a different admin email!
+    
+    if (req.user && req.user.email === adminEmail) {
+        next(); // It's you! Let them through.
+    } else {
+        res.status(403).json({ success: false, message: "Nice try, but you are not the Admin!" });
+    }
+};
+
+// ==========================================
+// --- 👑 SECRET ADMIN ROUTES ---
+// ==========================================
+
+// SECURE ADMIN: Get all pending users
+app.get('/api/admin/pending', authenticateToken, requireAdmin, async (req, res) => {
+    try {
+        const query = "SELECT email, username, course, year, created_at FROM users WHERE status = 'pending' ORDER BY created_at ASC";
+        const result = await pool.query(query);
+        res.status(200).json({ success: true, users: result.rows });
+    } catch (error) {
+        console.error("Admin Fetch Error:", error);
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+});
+
+// SECURE ADMIN: Approve or Reject a user
+app.post('/api/admin/moderate', authenticateToken, requireAdmin, async (req, res) => {
+    const { email, action } = req.body; // action will be 'approved' or 'rejected'
+    
+    try {
+        if (action === 'approved') {
+            await pool.query("UPDATE users SET status = 'approved' WHERE email = $1", [email]);
+            res.status(200).json({ success: true, message: `User ${email} approved!` });
+        } else if (action === 'rejected') {
+            // If rejected, we just delete their application from the table
+            await pool.query("DELETE FROM users WHERE email = $1", [email]);
+            res.status(200).json({ success: true, message: `User ${email} rejected and removed.` });
+        } else {
+            res.status(400).json({ success: false, message: "Invalid action." });
+        }
+    } catch (error) {
+        console.error("Admin Moderate Error:", error);
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+});
 
 // ==========================================
 // --- SECURE ROUTES (Requires Token) ---
