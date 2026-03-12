@@ -70,6 +70,10 @@ const initDb = async () => {
         await pool.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS image_data TEXT;`).catch(()=>console.log("Image column exists"));
         await pool.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS score INTEGER DEFAULT 1;`).catch(()=>console.log("Score column exists"));
         await pool.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS author TEXT DEFAULT 'u/Anonymous';`).catch(()=>console.log("Author column exists"));
+        
+        // 🚨 UPGRADED: Add the avatar_url column to the users table
+        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;`).catch(()=>console.log("Avatar column exists"));
+
         await pool.query(createCommentsQuery);
         console.log("✅ Database tables verified.");
     } catch (err) {
@@ -184,6 +188,7 @@ const authenticateToken = (req, res, next) => {
         next();
     });
 };
+
 // --- ADMIN SECURITY GUARD ---
 // This checks if the logged-in user is YOU before letting them do admin stuff!
 const requireAdmin = (req, res, next) => {
@@ -237,13 +242,68 @@ app.post('/api/admin/moderate', authenticateToken, requireAdmin, async (req, res
 // --- SECURE ROUTES (Requires Token) ---
 // ==========================================
 
+// 🚨 SECURE: Get My Profile
+app.get('/api/profile', authenticateToken, async (req, res) => {
+    try {
+        const query = 'SELECT course, year, avatar_url FROM users WHERE email = $1';
+        const result = await pool.query(query, [req.user.email]);
+        res.status(200).json({ success: true, profile: result.rows[0] });
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+});
+
+// 🚨 SECURE: Update Profile
+app.put('/api/profile', authenticateToken, async (req, res) => {
+    const { course, year, avatar_data } = req.body;
+    const email = req.user.email;
+    let finalAvatarUrl = null;
+
+    try {
+        // If they uploaded a new picture, send it to Supabase!
+        if (avatar_data && avatar_data.startsWith('data:image')) {
+            const matches = avatar_data.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+            if (matches && matches.length === 3) {
+                const mimeType = matches[1];
+                const imageBuffer = Buffer.from(matches[2], 'base64');
+                const fileExt = mimeType.split('/')[1];
+                const fileName = `avatar-${Date.now()}.${fileExt}`;
+
+                // Using existing post-images bucket for avatars
+                const { data, error } = await supabase.storage
+                    .from('post-images')
+                    .upload(fileName, imageBuffer, { contentType: mimeType, upsert: false });
+
+                if (!error) {
+                    const { data: publicUrlData } = supabase.storage.from('post-images').getPublicUrl(fileName);
+                    finalAvatarUrl = publicUrlData.publicUrl;
+                }
+            }
+        }
+
+        // Update the database
+        if (finalAvatarUrl) {
+            await pool.query('UPDATE users SET course = $1, year = $2, avatar_url = $3 WHERE email = $4', [course, year, finalAvatarUrl, email]);
+        } else {
+            // Update without changing the picture
+            await pool.query('UPDATE users SET course = $1, year = $2 WHERE email = $3', [course, year, email]);
+        }
+
+        res.status(200).json({ success: true, avatar_url: finalAvatarUrl });
+    } catch (error) {
+        console.error("Error saving profile:", error);
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+});
+
 // SECURE: Create Post
 app.post('/api/posts', authenticateToken, async (req, res) => {
     try {
         const { title, content, image_data } = req.body;
         let finalImageUrl = null;
         
-        // 🚨 NEW: Pull their official username securely from the JWT badge!
+        // Pull their official username securely from the JWT badge!
         const finalAuthor = req.user.username;
 
         if (image_data) {
@@ -295,7 +355,7 @@ app.post('/api/posts/:id/comments', authenticateToken, async (req, res) => {
         const postId = req.params.id;
         const { content } = req.body; 
         
-        // 🚨 NEW: Pull their official username securely from the JWT badge!
+        // Pull their official username securely from the JWT badge!
         const finalAuthor = req.user.username; 
 
         const query = 'INSERT INTO comments (post_id, content, author) VALUES ($1, $2, $3) RETURNING *';

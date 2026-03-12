@@ -659,24 +659,62 @@ if (profilePicUpload) {
         }
     });
 }
-
 if (saveFullProfileBtn) {
-    saveFullProfileBtn.addEventListener('click', () => {
-        saveFullProfileBtn.innerText = "Saving...";
-        const updatedProfile = {
-            course: editCourseInput.value.trim(),
-            year: editYearInput.value.trim(),
-            avatar: editAvatarPreview.src
-        };
-        localStorage.setItem('uniProfile', JSON.stringify(updatedProfile));
-        applyProfileData();
+    saveFullProfileBtn.addEventListener('click', async () => {
+        saveFullProfileBtn.innerText = "Saving to Cloud...";
+        saveFullProfileBtn.disabled = true;
 
-        setTimeout(() => {
+        const myToken = localStorage.getItem('uniToken');
+        const courseStr = editCourseInput.value.trim();
+        const yearStr = editYearInput.value.trim();
+        // Only send image data if it's a NEW base64 upload, not an existing HTTP link
+        const avatarData = editAvatarPreview.src.startsWith('data:image') ? editAvatarPreview.src : null;
+
+        try {
+            const response = await fetch('https://unithread-backend.onrender.com/api/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${myToken}`
+                },
+                body: JSON.stringify({
+                    course: courseStr,
+                    year: yearStr,
+                    avatar_data: avatarData
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Update local storage so the UI updates instantly
+                const savedProfile = JSON.parse(localStorage.getItem('uniProfile')) || {};
+                savedProfile.course = courseStr;
+                savedProfile.year = yearStr;
+                if (data.avatar_url) savedProfile.avatar = data.avatar_url;
+                
+                localStorage.setItem('uniProfile', JSON.stringify(savedProfile));
+                applyProfileData();
+
+                saveFullProfileBtn.innerText = "✅ Saved!";
+                setTimeout(() => {
+                    saveFullProfileBtn.innerText = "Save Changes";
+                    saveFullProfileBtn.disabled = false;
+                    editProfilePage.style.display = 'none';
+                    mainFeed.style.display = 'block';
+                    if(rightSidebar) rightSidebar.style.display = 'block';
+                }, 1000);
+            } else {
+                alert("Failed to save profile: " + data.message);
+                saveFullProfileBtn.innerText = "Save Changes";
+                saveFullProfileBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error("Profile save error", error);
+            alert("Network error. Could not save profile.");
             saveFullProfileBtn.innerText = "Save Changes";
-            editProfilePage.style.display = 'none';
-            mainFeed.style.display = 'block';
-            if(rightSidebar) rightSidebar.style.display = 'block';
-        }, 500);
+            saveFullProfileBtn.disabled = false;
+        }
     });
 }
 
