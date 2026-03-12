@@ -156,6 +156,10 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => authModal.style.display = 'flex', 500);
     } else {
         updateProfileUI(); 
+        // 🚨 NEW: Fetch permanent profile on load!
+        if (typeof syncProfileFromCloud === 'function') {
+            syncProfileFromCloud();
+        }
     }
     loadAllPosts();
 });
@@ -636,6 +640,34 @@ const applyProfileData = () => {
 };
 
 applyProfileData();
+
+// 🚨 NEW: Download permanent profile from the database!
+async function syncProfileFromCloud() {
+    const myToken = localStorage.getItem('uniToken');
+    if (!myToken) return;
+
+    try {
+        const response = await fetch('https://unithread-backend.onrender.com/api/profile', {
+            headers: { 'Authorization': `Bearer ${myToken}` }
+        });
+        const data = await response.json();
+
+        if (data.success && data.profile) {
+            // Update local storage with the official database info
+            const cloudProfile = {
+                course: data.profile.course || 'BCA / IT',
+                year: data.profile.year || '1st Year',
+                avatar: data.profile.avatar_url || 'https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1' // Default avatar
+            };
+            localStorage.setItem('uniProfile', JSON.stringify(cloudProfile));
+            
+            // Re-apply the visuals instantly!
+            applyProfileData();
+        }
+    } catch (error) {
+        console.error("Failed to sync profile from cloud:", error);
+    }
+}
 
 if (editProfileBtn) {
     editProfileBtn.addEventListener('click', () => {
