@@ -1,10 +1,11 @@
-// --- DOM ELEMENTS ---
+// ==========================================
+// --- 1. DOM ELEMENTS & SETUP ---
+// ==========================================
 const menuToggle = document.getElementById('menu-toggle');
 const sideDrawer = document.getElementById('side-drawer');
 const sidebarOverlay = document.getElementById('sidebar-overlay');
 const profileBtn = document.getElementById('profile-btn');
 const profileDropdown = document.getElementById('profile-dropdown');
-const viewProfileBtn = document.getElementById('view-profile-btn'); 
 const dropdownLoginBtn = document.getElementById('dropdown-login-btn');
 const dropdownLogoutBtn = document.getElementById('dropdown-logout-btn');
 const createPostBtn = document.getElementById('create-post-btn');
@@ -16,7 +17,6 @@ const userEmailInput = document.getElementById('user-email');
 const verifyBtn = document.getElementById('verify-btn');
 const otpInput = document.getElementById('otp-code');
 
-// Page Containers
 const feedContainer = document.getElementById('feed-container'); 
 const mainFeed = document.getElementById('main-feed-list'); 
 const createPostPage = document.getElementById('create-post-page');
@@ -24,7 +24,6 @@ const postDetailPage = document.getElementById('post-detail-page');
 const editProfilePage = document.getElementById('edit-profile-page'); 
 const singlePostContainer = document.getElementById('single-post-container');
 
-// Buttons
 const cancelPostBtn = document.getElementById('cancel-post-btn');
 const backToFeedBtn = document.getElementById('back-to-feed-btn');
 const backFromEditBtn = document.getElementById('back-from-edit-btn');
@@ -39,6 +38,10 @@ const customUploadBtn = document.getElementById('custom-upload-btn');
 const realFileInput = document.getElementById('real-file-input');
 const uploadText = document.getElementById('upload-text');
 
+// Dummy function to catch the old HTML onclicks so they don't throw errors
+window.openProfilePage = function(e) { if(e) e.preventDefault(); };
+
+// Helper Functions
 function showPage(pageId) {
     if (feedContainer) feedContainer.style.display = 'none';
     if (createPostPage) createPostPage.style.display = 'none';
@@ -56,6 +59,9 @@ const toBase64 = file => new Promise((resolve, reject) => {
     reader.onerror = error => reject(error);
 });
 
+// ==========================================
+// --- 2. PROFILE & FEED LOGIC ---
+// ==========================================
 function updateProfileUI() {
     const token = localStorage.getItem('uniToken');
     const savedEmail = localStorage.getItem('userEmail');
@@ -69,10 +75,8 @@ function updateProfileUI() {
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             const realUsername = payload.username || 'u/' + savedEmail.split('@')[0];
-            const otherProfileNames = document.querySelectorAll('.profile-username');
-            otherProfileNames.forEach(el => el.innerText = realUsername);
-            const profileEmailText = document.querySelectorAll('.profile-email');
-            profileEmailText.forEach(el => el.innerText = savedEmail);
+            document.querySelectorAll('.profile-username').forEach(el => el.innerText = realUsername);
+            document.querySelectorAll('.profile-email').forEach(el => el.innerText = savedEmail);
         } catch (error) {}
     }
 }
@@ -85,7 +89,6 @@ async function loadAllPosts() {
         if (data.success) {
             let myVotes = {};
             try { myVotes = JSON.parse(localStorage.getItem('myVotes')) || {}; } catch(e){}
-
             if (mainFeed) mainFeed.innerHTML = '';
 
             data.posts.reverse().forEach(post => {
@@ -99,7 +102,6 @@ async function loadAllPosts() {
                 const dropDisabled = myVotes[post.id] === 'drop' ? 'downvoted' : '';
                 const scoreColor = upDisabled ? 'upvoted-score' : (dropDisabled ? 'downvoted-score' : '');
 
-                // 🚨 NEW: Removed side column, moved voting to the footer with hollow arrows
                 const newPostHTML = `
                     <div class="post-card" data-id="${post.id}">
                         <div class="post-body">
@@ -113,7 +115,6 @@ async function loadAllPosts() {
                             <div class="post-excerpt">${post.content}</div>
                             ${imageHTML}
                             <div class="post-footer" style="margin-top: 16px;">
-                                
                                 <div class="inline-vote">
                                     <button class="vote-btn up-btn ${upDisabled}">
                                         <svg width="18" height="18" viewBox="0 0 24 24" class="vote-icon"><path d="M12 3l8 10h-5v8H9v-8H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
@@ -123,7 +124,6 @@ async function loadAllPosts() {
                                         <svg width="18" height="18" viewBox="0 0 24 24" class="vote-icon"><path d="M12 21l-8-10h5V3h6v8h5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
                                     </button>
                                 </div>
-
                                 <button class="footer-btn">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                                     Comments
@@ -134,16 +134,11 @@ async function loadAllPosts() {
                                 </button>
                             </div>
                         </div>
-                    </div>
-                `;
-                
+                    </div>`;
                 if (mainFeed) mainFeed.insertAdjacentHTML('beforeend', newPostHTML);
             });
 
-            setTimeout(() => {
-                document.querySelectorAll('.post-card').forEach(card => card.classList.add('visible'));
-            }, 50);
-
+            setTimeout(() => { document.querySelectorAll('.post-card').forEach(card => card.classList.add('visible')); }, 50);
             showPage('feed-container');
         }
     } catch (error) { console.error("Error loading feed:", error); }
@@ -160,17 +155,16 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAllPosts();
 });
 
-// --- NAVIGATION LISTENERS ---
+// ==========================================
+// --- 3. MENU & NAVIGATION LOGIC ---
+// ==========================================
 createPostBtn.addEventListener('click', () => showPage('create-post-page'));
 cancelPostBtn.addEventListener('click', () => showPage('feed-container'));
 backToFeedBtn.addEventListener('click', () => { showPage('feed-container'); currentOpenPostId = null; });
 if (backFromEditBtn) backFromEditBtn.addEventListener('click', () => showPage('feed-container'));
 
-// --- MENU & MODAL LISTENERS ---
 menuToggle.addEventListener('click', (e) => { 
-    e.stopPropagation(); 
-    sideDrawer.classList.toggle('open'); 
-    menuToggle.classList.toggle('open');
+    e.stopPropagation(); sideDrawer.classList.toggle('open'); menuToggle.classList.toggle('open');
     if(sidebarOverlay) sidebarOverlay.classList.toggle('show');
 });
 
@@ -198,7 +192,33 @@ window.addEventListener('click', (e) => {
     }
 });
 
-// --- PUBLISH POST LOGIC ---
+// 🚨🚨 THE INVINCIBLE PROFILE OPENER 🚨🚨
+document.addEventListener('click', (e) => {
+    const editBtn = e.target.closest('#settings-btn');
+    const viewBanner = e.target.closest('#view-profile-btn');
+
+    if (editBtn || viewBanner) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if(profileDropdown) profileDropdown.classList.remove('open');
+        showPage('edit-profile-page');
+
+        try {
+            const savedProfile = JSON.parse(localStorage.getItem('uniProfile'));
+            if (savedProfile) {
+                const editCourseInput = document.getElementById('edit-course-input');
+                const editYearInput = document.getElementById('edit-year-input');
+                if (editCourseInput) editCourseInput.value = savedProfile.course || '';
+                if (editYearInput) editYearInput.value = savedProfile.year || '';
+            }
+        } catch(err) {}
+    }
+});
+
+// ==========================================
+// --- 4. PUBLISH POST LOGIC ---
+// ==========================================
 publishBtn.addEventListener('click', async () => {
     const title = titleInput.value.trim();
     let content = editorContent.innerHTML.trim(); 
@@ -233,7 +253,9 @@ publishBtn.addEventListener('click', async () => {
     finally { publishBtn.innerText = "Publish Post"; publishBtn.disabled = false; }
 });
 
-// --- COMMENTS ---
+// ==========================================
+// --- 5. COMMENTS & FEED INTERACTION ---
+// ==========================================
 async function loadComments(postId) {
     const commentsList = document.getElementById('comments-list');
     commentsList.innerHTML = '<div class="no-comments"><p>Loading comments...</p></div>';
@@ -289,28 +311,21 @@ if (addCommentBtn) {
     });
 }
 
-// 🚨 NEW: Universal Voting Logic (Works everywhere!)
 document.body.addEventListener('click', async (e) => {
+    // Handling Votes
     const upBtn = e.target.closest('.up-btn');
     const dropBtn = e.target.closest('.drop-btn');
-    
     if (upBtn || dropBtn) {
         e.stopPropagation();
         const postCard = (upBtn || dropBtn).closest('.post-card');
         if (!postCard) return;
-        
         const postId = postCard.getAttribute('data-id');
         const scoreSpan = postCard.querySelector('.vote-score');
         if (scoreSpan.innerText === "...") return;
 
         let myVotes = {};
         try { myVotes = JSON.parse(localStorage.getItem('myVotes')) || {}; } catch(err){}
-        
-        // 🚨 STRICT LOCK: Prevents multiple votes!
-        if (myVotes[postId]) {
-            alert("You have already voted on this post!");
-            return; 
-        }
+        if (myVotes[postId]) { alert("You have already voted on this post!"); return; }
 
         const action = upBtn ? 'up' : 'drop';
         const originalScore = scoreSpan.innerText;
@@ -319,8 +334,7 @@ document.body.addEventListener('click', async (e) => {
 
         try {
             const response = await fetch(`https://unithread-backend.onrender.com/api/posts/${postId}/vote`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${myToken}` },
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${myToken}` },
                 body: JSON.stringify({ action: action })
             });
             const data = await response.json();
@@ -328,15 +342,23 @@ document.body.addEventListener('click', async (e) => {
                 scoreSpan.innerText = data.newScore;
                 (upBtn || dropBtn).classList.add(action === 'up' ? 'upvoted' : 'downvoted');
                 scoreSpan.classList.add(action === 'up' ? 'upvoted-score' : 'downvoted-score');
-                myVotes[postId] = action; 
-                localStorage.setItem('myVotes', JSON.stringify(myVotes)); 
+                myVotes[postId] = action; localStorage.setItem('myVotes', JSON.stringify(myVotes)); 
             } else { scoreSpan.innerText = originalScore; }
         } catch (error) { scoreSpan.innerText = originalScore; }
         return;
     }
+
+    // Handling Polls
+    if (e.target.classList.contains('poll-option')) {
+        const container = e.target.closest('.poll-container');
+        container.querySelectorAll('.poll-option').forEach(opt => {
+            opt.style.background = 'var(--bg-surface)'; opt.style.borderColor = 'var(--border-2)'; opt.innerText = opt.innerText.replace('●', '○');
+        });
+        e.target.style.background = 'var(--accent-subtle)'; e.target.style.borderColor = 'var(--accent-border)'; e.target.innerText = e.target.innerText.replace('○', '●');
+        return;
+    }
 });
 
-// Opening Posts & Deleting
 if(mainFeed) {
     mainFeed.addEventListener('click', async (e) => {
         const deleteBtn = e.target.closest('.delete-post-btn');
@@ -359,7 +381,6 @@ if(mainFeed) {
             return; 
         }
         
-        // Prevent opening if clicking inside inline-vote or polls
         if (e.target.closest('.inline-vote') || e.target.classList.contains('poll-option') || e.target.tagName === 'A') return;
         
         const postCard = e.target.closest('.post-card');
@@ -375,7 +396,6 @@ if(mainFeed) {
     });
 }
 
-// --- CREATE POST EXTRAS ---
 titleInput.addEventListener('input', () => {
     const len = titleInput.value.length; titleCounter.innerText = `${len}/300`;
     if (len > 0) { publishBtn.disabled = false; publishBtn.style.opacity = '1'; publishBtn.style.cursor = 'pointer'; } 
@@ -403,17 +423,10 @@ if(customUploadBtn) {
         }
     });
 }
-document.body.addEventListener('click', (e) => {
-    if (e.target.classList.contains('poll-option')) {
-        const container = e.target.closest('.poll-container');
-        container.querySelectorAll('.poll-option').forEach(opt => {
-            opt.style.background = 'var(--bg-surface)'; opt.style.borderColor = 'var(--border-2)'; opt.innerText = opt.innerText.replace('●', '○');
-        });
-        e.target.style.background = 'var(--accent-subtle)'; e.target.style.borderColor = 'var(--accent-border)'; e.target.innerText = e.target.innerText.replace('○', '●');
-    }
-});
 
-// --- OTP & AUTH ---
+// ==========================================
+// --- 6. AUTHENTICATION & OTP ---
+// ==========================================
 sendOtpBtn.addEventListener('click', async () => {
     const email = userEmailInput.value.trim();
     if (email.endsWith('.edu') || email.includes('.ac.in') || email.endsWith('@gmail.com')) {
@@ -429,12 +442,14 @@ sendOtpBtn.addEventListener('click', async () => {
         finally { sendOtpBtn.innerText = "Send OTP"; sendOtpBtn.disabled = false; }
     } else { alert("Access Denied: Please use your official University Email ID."); }
 });
+
 const profileSetupSection = document.getElementById('profile-setup-section');
 const setupUsernameInput = document.getElementById('setup-username');
 const setupCourseInput = document.getElementById('setup-course');
 const setupYearInput = document.getElementById('setup-year');
 const submitProfileBtn = document.getElementById('submit-profile-btn');
 let tempRegistrationEmail = ""; 
+
 verifyBtn.addEventListener('click', async () => {
     const email = userEmailInput.value; const otp = otpInput.value;
     try {
@@ -456,6 +471,7 @@ verifyBtn.addEventListener('click', async () => {
         } else { alert("❌ " + result.message); }
     } catch (error) { alert("Error verifying OTP."); }
 });
+
 if (submitProfileBtn) {
     submitProfileBtn.addEventListener('click', async () => {
         const username = setupUsernameInput.value.trim(); const course = setupCourseInput.value.trim(); const year = setupYearInput.value.trim();
@@ -478,9 +494,9 @@ if (submitProfileBtn) {
     });
 }
 
-// --- PROFILE EDIT ---
-const editCourseInput = document.getElementById('edit-course-input');
-const editYearInput = document.getElementById('edit-year-input');
+// ==========================================
+// --- 7. EDIT PROFILE & CLOUD SAVE ---
+// ==========================================
 const profilePicUpload = document.getElementById('profile-pic-upload');
 const editAvatarPreview = document.getElementById('edit-avatar-preview');
 const saveFullProfileBtn = document.getElementById('save-full-profile-btn');
@@ -516,51 +532,6 @@ async function syncProfileFromCloud() {
     } catch (error) { }
 }
 
-const settingsBtn = document.getElementById('settings-btn');
-
-// 🚨 BRUTE FORCE PROFILE OPENER
-window.openProfilePage = function(e) {
-    if(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-    
-    // 🚨 IF YOU SEE THIS POPUP, THE BUTTON WORKS!
-    alert("Button clicked! Attempting to open profile...");
-
-    // 1. Force close the dropdown
-    const dropdown = document.getElementById('profile-dropdown');
-    if (dropdown) dropdown.classList.remove('open');
-    
-    // 2. Force hide all other pages
-    document.getElementById('feed-container').style.display = 'none';
-    document.getElementById('create-post-page').style.display = 'none';
-    document.getElementById('post-detail-page').style.display = 'none';
-    
-    // 3. Force show the profile page
-    document.getElementById('edit-profile-page').style.display = 'block';
-
-    // 4. Safely load your data
-    try {
-        const savedProfile = JSON.parse(localStorage.getItem('uniProfile'));
-        if (savedProfile) {
-            const courseInput = document.getElementById('edit-course-input');
-            const yearInput = document.getElementById('edit-year-input');
-            if (courseInput) courseInput.value = savedProfile.course || '';
-            if (yearInput) yearInput.value = savedProfile.year || '';
-        }
-    } catch(err) {
-        console.log("No profile data yet.");
-    }
-};
-
-// Ensure the listeners are explicitly attached
-if (viewProfileBtn) {
-    viewProfileBtn.addEventListener('click', openProfilePage);
-}
-if (settingsBtn) {
-    settingsBtn.addEventListener('click', openProfilePage);
-}
 if (profilePicUpload) {
     profilePicUpload.addEventListener('change', async (e) => {
         const file = e.target.files[0];
@@ -571,7 +542,8 @@ if (saveFullProfileBtn) {
     saveFullProfileBtn.addEventListener('click', async () => {
         saveFullProfileBtn.innerText = "Saving..."; saveFullProfileBtn.disabled = true;
         const myToken = localStorage.getItem('uniToken');
-        const courseStr = editCourseInput.value.trim(); const yearStr = editYearInput.value.trim();
+        const courseStr = document.getElementById('edit-course-input').value.trim(); 
+        const yearStr = document.getElementById('edit-year-input').value.trim();
         const avatarData = editAvatarPreview.src.startsWith('data:image') ? editAvatarPreview.src : null;
         try {
             const response = await fetch('https://unithread-backend.onrender.com/api/profile', {
@@ -591,7 +563,9 @@ if (saveFullProfileBtn) {
     });
 }
 
-// --- DRAFTS & ADMIN LOGIC ---
+// ==========================================
+// --- 8. DRAFTS & ADMIN MODAL ---
+// ==========================================
 const saveDraftBtn = document.getElementById('save-draft-btn');
 const draftLink = document.querySelector('.draft-link');
 const draftsModal = document.getElementById('drafts-modal');
@@ -677,7 +651,9 @@ if (pendingUsersList) {
     });
 }
 
-// --- 🌙 LIGHT/DARK THEME TOGGLE LOGIC ---
+// ==========================================
+// --- 9. THEME TOGGLE LOGIC ---
+// ==========================================
 const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const htmlElement = document.documentElement;
 const savedTheme = localStorage.getItem('unithreadTheme') || 'dark';
