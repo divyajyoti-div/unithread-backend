@@ -605,12 +605,26 @@ async function syncProfileFromCloud() {
     } catch (error) { console.error("Cloud sync failed."); }
 }
 
-if (viewProfileBtn) {
-    viewProfileBtn.addEventListener('click', () => {
-        if(profileDropdown) profileDropdown.classList.remove('open');
-        showPage('edit-profile-page');
-    });
+const settingsBtn = document.getElementById('settings-btn');
+
+function openProfilePage() {
+    if(profileDropdown) profileDropdown.classList.remove('open');
+    
+    // Load your current profile data into the input boxes!
+    const savedProfile = JSON.parse(localStorage.getItem('uniProfile'));
+    if (savedProfile) {
+        const editCourseInput = document.getElementById('edit-course-input');
+        const editYearInput = document.getElementById('edit-year-input');
+        if (editCourseInput) editCourseInput.value = savedProfile.course || '';
+        if (editYearInput) editYearInput.value = savedProfile.year || '';
+    }
+    
+    showPage('edit-profile-page');
 }
+
+// Make BOTH the header banner and the new button open the profile!
+if (viewProfileBtn) viewProfileBtn.addEventListener('click', openProfilePage);
+if (settingsBtn) settingsBtn.addEventListener('click', openProfilePage);
 
 if (profilePicUpload) {
     profilePicUpload.addEventListener('change', async (e) => {
