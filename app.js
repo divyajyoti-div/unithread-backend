@@ -39,8 +39,9 @@ const customUploadBtn = document.getElementById('custom-upload-btn');
 const realFileInput = document.getElementById('real-file-input');
 const uploadText = document.getElementById('upload-text');
 
-// 🚨 NEW: Master Page Navigation Function
+// 🚨 NEW: Master Page Navigation Function (With Debugging)
 function showPage(pageId) {
+    console.log("🛠️ DEBUG: Switching to page ->", pageId);
     if (feedContainer) feedContainer.style.display = 'none';
     if (createPostPage) createPostPage.style.display = 'none';
     if (postDetailPage) postDetailPage.style.display = 'none';
@@ -108,7 +109,6 @@ async function loadAllPosts() {
                 const upDisabled = myVotes[post.id] === 'up' ? 'upvoted' : '';
                 const dropDisabled = myVotes[post.id] === 'drop' ? 'downvoted' : '';
 
-                // 🚨 NEW: Uses your beautiful Cyberpunk CSS template!
                 const newPostHTML = `
                     <div class="post-card" data-id="${post.id}">
                         <div class="vote-col">
@@ -143,7 +143,6 @@ async function loadAllPosts() {
                 if (mainFeed) mainFeed.insertAdjacentHTML('beforeend', newPostHTML);
             });
 
-            // Trigger the pop-in animation!
             setTimeout(() => {
                 document.querySelectorAll('.post-card').forEach(card => card.classList.add('visible'));
             }, 50);
@@ -564,7 +563,7 @@ if (submitProfileBtn) {
     });
 }
 
-// --- PROFILE EDIT ---
+// --- PROFILE EDIT (🚨 BULLETPROOFED) ---
 const editCourseInput = document.getElementById('edit-course-input');
 const editYearInput = document.getElementById('edit-year-input');
 const profilePicUpload = document.getElementById('profile-pic-upload');
@@ -572,16 +571,20 @@ const editAvatarPreview = document.getElementById('edit-avatar-preview');
 const saveFullProfileBtn = document.getElementById('save-full-profile-btn');
 
 const applyProfileData = () => {
-    const savedProfile = JSON.parse(localStorage.getItem('uniProfile'));
-    if (savedProfile) {
-        const userYearSpan = document.getElementById('user-year');
-        if (userYearSpan) userYearSpan.innerText = savedProfile.year || 'N/A';
-        
-        if (savedProfile.avatar) {
-            const allAvatars = document.querySelectorAll('.nav-avatar, .pd-big-avatar, .comment-composer-avatar, .pf-avatar');
-            allAvatars.forEach(img => img.src = savedProfile.avatar);
-            if (editAvatarPreview) editAvatarPreview.src = savedProfile.avatar;
+    try {
+        const savedProfile = JSON.parse(localStorage.getItem('uniProfile'));
+        if (savedProfile) {
+            const userYearSpan = document.getElementById('user-year');
+            if (userYearSpan) userYearSpan.innerText = savedProfile.year || 'N/A';
+            
+            if (savedProfile.avatar) {
+                const allAvatars = document.querySelectorAll('.nav-avatar, .pd-big-avatar, .comment-composer-avatar, .pf-avatar');
+                allAvatars.forEach(img => img.src = savedProfile.avatar);
+                if (editAvatarPreview) editAvatarPreview.src = savedProfile.avatar;
+            }
         }
+    } catch (err) {
+        console.error("Local storage error in applyProfileData - safely ignored.", err);
     }
 };
 
@@ -607,16 +610,21 @@ async function syncProfileFromCloud() {
 
 const settingsBtn = document.getElementById('settings-btn');
 
-function openProfilePage() {
+function openProfilePage(e) {
+    if(e) e.stopPropagation(); 
+    console.log("🛠️ DEBUG: Opening Profile Page!");
+
     if(profileDropdown) profileDropdown.classList.remove('open');
     
     // Load your current profile data into the input boxes!
-    const savedProfile = JSON.parse(localStorage.getItem('uniProfile'));
-    if (savedProfile) {
-        const editCourseInput = document.getElementById('edit-course-input');
-        const editYearInput = document.getElementById('edit-year-input');
-        if (editCourseInput) editCourseInput.value = savedProfile.course || '';
-        if (editYearInput) editYearInput.value = savedProfile.year || '';
+    try {
+        const savedProfile = JSON.parse(localStorage.getItem('uniProfile'));
+        if (savedProfile) {
+            if (editCourseInput) editCourseInput.value = savedProfile.course || '';
+            if (editYearInput) editYearInput.value = savedProfile.year || '';
+        }
+    } catch(err) {
+        console.error("Local storage error in openProfilePage - safely ignored.", err);
     }
     
     showPage('edit-profile-page');
@@ -696,7 +704,8 @@ if (saveDraftBtn) {
             date: new Date().toLocaleDateString()
         };
 
-        let drafts = JSON.parse(localStorage.getItem('uniThreadDrafts')) || [];
+        let drafts = [];
+        try { drafts = JSON.parse(localStorage.getItem('uniThreadDrafts')) || []; } catch(err){}
         drafts.push(newDraft);
         localStorage.setItem('uniThreadDrafts', JSON.stringify(drafts));
 
@@ -708,7 +717,9 @@ if (saveDraftBtn) {
 
 if (draftLink) {
     draftLink.addEventListener('click', () => {
-        let drafts = JSON.parse(localStorage.getItem('uniThreadDrafts')) || [];
+        let drafts = [];
+        try { drafts = JSON.parse(localStorage.getItem('uniThreadDrafts')) || []; } catch(err){}
+        
         if (drafts.length === 0) { alert("No saved drafts."); return; }
 
         draftsListContainer.innerHTML = '';
@@ -734,7 +745,8 @@ if (draftsListContainer) {
     draftsListContainer.addEventListener('click', (e) => {
         const loadBtn = e.target.closest('.load-draft-btn');
         const deleteBtn = e.target.closest('.delete-draft-btn');
-        let drafts = JSON.parse(localStorage.getItem('uniThreadDrafts')) || [];
+        let drafts = [];
+        try { drafts = JSON.parse(localStorage.getItem('uniThreadDrafts')) || []; } catch(err){}
 
         if (loadBtn) {
             const draftId = loadBtn.getAttribute('data-id');
