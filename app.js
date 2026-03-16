@@ -518,30 +518,41 @@ async function syncProfileFromCloud() {
 
 const settingsBtn = document.getElementById('settings-btn');
 
-function openProfilePage(e) {
-    // Stop the click from closing the dropdown immediately and messing up the event
+// 🚨 BRUTE FORCE PROFILE OPENER
+window.openProfilePage = function(e) {
     if(e) {
         e.preventDefault();
         e.stopPropagation();
     }
     
-    console.log("🛠️ DEBUG: Opening Edit Profile Page!");
+    // 🚨 IF YOU SEE THIS POPUP, THE BUTTON WORKS!
+    alert("Button clicked! Attempting to open profile...");
+
+    // 1. Force close the dropdown
+    const dropdown = document.getElementById('profile-dropdown');
+    if (dropdown) dropdown.classList.remove('open');
     
-    if(profileDropdown) profileDropdown.classList.remove('open');
+    // 2. Force hide all other pages
+    document.getElementById('feed-container').style.display = 'none';
+    document.getElementById('create-post-page').style.display = 'none';
+    document.getElementById('post-detail-page').style.display = 'none';
     
+    // 3. Force show the profile page
+    document.getElementById('edit-profile-page').style.display = 'block';
+
+    // 4. Safely load your data
     try {
         const savedProfile = JSON.parse(localStorage.getItem('uniProfile'));
         if (savedProfile) {
-            if (editCourseInput) editCourseInput.value = savedProfile.course || '';
-            if (editYearInput) editYearInput.value = savedProfile.year || '';
+            const courseInput = document.getElementById('edit-course-input');
+            const yearInput = document.getElementById('edit-year-input');
+            if (courseInput) courseInput.value = savedProfile.course || '';
+            if (yearInput) yearInput.value = savedProfile.year || '';
         }
     } catch(err) {
-        console.log("No profile data found in local storage");
+        console.log("No profile data yet.");
     }
-    
-    // Explicitly call our showPage function
-    showPage('edit-profile-page');
-}
+};
 
 // Ensure the listeners are explicitly attached
 if (viewProfileBtn) {
