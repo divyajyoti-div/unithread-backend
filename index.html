@@ -45,7 +45,7 @@
             </div>
 
             <div id="profile-dropdown" class="profile-dropdown">
-              <div class="pd-identity" id="view-profile-btn" style="cursor: pointer;" onclick="window.openProfilePage(event)">
+                <div class="pd-identity" id="view-profile-btn" style="cursor: pointer;" onclick="forceOpenProfile()">
                     <div class="pd-identity-avatarwrap">
                         <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" class="pd-big-avatar" alt="Avatar">
                         <div class="pd-online-ring"></div>
@@ -68,7 +68,7 @@
                 </div>
                 <div class="pd-divider"></div>
                 
-                <button class="pd-item" id="settings-btn">
+                <button class="pd-item" id="settings-btn" onclick="forceOpenProfile()">
                     <div class="pd-ico"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
                     Edit Profile
                 </button>
@@ -142,8 +142,7 @@
                 </div>
             </div>
 
-            <div class="feed" id="main-feed-list">
-                </div>
+            <div class="feed" id="main-feed-list"></div>
         </div>
 
         <div id="create-post-page" style="display: none;">
@@ -204,7 +203,7 @@
                     <label class="anon-check">
                         <input type="checkbox" id="anon-checkbox">
                         <div class="check-box"></div>
-                         Post Anonymously
+                        🕵️ Post Anonymously
                     </label>
                     <div style="display: flex; gap: 10px;">
                         <button class="btn-ghost" id="save-draft-btn">Save Draft</button>
@@ -243,7 +242,7 @@
         </div>
 
         <div id="edit-profile-page" style="display: none;">
-            <button class="back-btn" id="back-from-edit-btn">← Back to Feed</button>
+            <button class="back-btn" id="back-from-edit-btn" onclick="forceCloseProfile()">← Back to Feed</button>
             <div class="pf-card">
                 <div class="pf-hero">
                     <div class="pf-avatar-zone">
@@ -334,8 +333,7 @@
                 <button class="modal-close" id="close-drafts-btn">&times;</button>
             </div>
             <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
-                <div id="drafts-list-container">
-                    </div>
+                <div id="drafts-list-container"></div>
             </div>
         </div>
     </div>
@@ -358,6 +356,38 @@
         </div>
     </div>
 
-    <script src="app.js?v=999"></script>
+    <script>
+        function forceOpenProfile() {
+            // Instantly hide the dropdown menu
+            const dropdown = document.getElementById('profile-dropdown');
+            if (dropdown) dropdown.classList.remove('open');
+            
+            // Instantly hide every other page on the site
+            document.getElementById('feed-container').style.display = 'none';
+            document.getElementById('create-post-page').style.display = 'none';
+            document.getElementById('post-detail-page').style.display = 'none';
+            
+            // Instantly show the profile page
+            document.getElementById('edit-profile-page').style.display = 'block';
+            
+            // Fill in the data
+            try {
+                const profile = JSON.parse(localStorage.getItem('uniProfile'));
+                if (profile) {
+                    const cInput = document.getElementById('edit-course-input');
+                    const yInput = document.getElementById('edit-year-input');
+                    if (cInput) cInput.value = profile.course || '';
+                    if (yInput) yInput.value = profile.year || '';
+                }
+            } catch(e) {}
+        }
+
+        function forceCloseProfile() {
+            document.getElementById('edit-profile-page').style.display = 'none';
+            document.getElementById('feed-container').style.display = 'block';
+        }
+    </script>
+
+    <script src="app.js?v=1000"></script>
 </body>
 </html>
