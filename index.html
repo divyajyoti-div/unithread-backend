@@ -1,316 +1,354 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UniThread | Your Campus, Your Voice</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header class="navbar">
         <div class="nav-left">
-            <div id="menu-toggle" class="hamburger">
+            <button id="menu-toggle" class="hamburger">
                 <span></span><span></span><span></span>
-            </div>
-            <div class="logo">Uni<span class="thread">Thread</span></div>
+            </button>
+            <a href="#" class="logo">
+                <div class="logo-icon"></div>
+                Uni<span class="logo-accent">Thread</span>
+            </a>
         </div>
         
-        <div class="search-bar">
-            <span class="search-icon">🔍</span>
-            <input type="text" placeholder="Search posts, departments, or clubs...">
+        <div class="search-wrap">
+            <span class="search-ico">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </span>
+            <input type="text" class="search-input" placeholder="Search posts, flairs, authors...">
+            <span class="search-kbd">⌘K</span>
         </div>
         
-        <div class="nav-actions">
-            <div class="notification-bell">
-                <span class="bell-icon">🔔</span>
-                <span class="notif-badge" id="notif-count">3</span>
+        <div class="nav-right">
+            <div class="theme-toggle" id="theme-toggle-btn">
+                <div class="toggle-thumb"></div>
+                <span class="theme-ico sun"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
+                <span class="theme-ico moon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
             </div>
 
-            <button id="create-post-btn" class="btn-primary">+ Create Post</button>
+            <button class="btn-login" id="dropdown-login-btn">Log in</button>
+            <button class="btn-create" id="create-post-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Create Post
+            </button>
 
-            <div class="profile-icon" id="profile-btn">
-                <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" alt="Profile">
+            <div class="avatar-wrap" id="profile-btn">
+                <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" class="nav-avatar" alt="Profile">
+                <div class="online-dot"></div>
             </div>
 
             <div id="profile-dropdown" class="profile-dropdown">
-                <div class="dropdown-item" id="dropdown-login-btn">
-                    <span class="dropdown-icon">🔑</span> Log In or Sign Up
-                </div>
-                <div class="dropdown-divider"></div>
-                
-                <div class="dropdown-item" id="admin-panel-btn" style="display: none;">
-                    <span class="dropdown-icon">🛡️</span> Admin Panel
-                </div>
-                <div class="dropdown-profile-header" id="view-profile-btn">
-                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" alt="Avatar" class="dropdown-avatar">
-                    <div class="dropdown-profile-info">
-                        <strong>View Profile</strong>
-                        <span class="text-muted">u/Divyajyoti_mishra</span>
+                <div class="pd-identity" id="view-profile-btn" style="cursor: pointer;">
+                    <div class="pd-identity-avatarwrap">
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" class="pd-big-avatar" alt="Avatar">
+                        <div class="pd-online-ring"></div>
+                    </div>
+                    <div class="pd-identity-info">
+                        <span class="pd-display-name profile-username">u/Guest</span>
+                        <span class="pd-handle profile-email">Not logged in</span>
                     </div>
                 </div>
-                <div class="dropdown-item"><span class="dropdown-icon">🏆</span> Achievements</div>
-                <div class="dropdown-item text-danger" id="dropdown-logout-btn">
-                    <span class="dropdown-icon">🚪</span> Log Out
+                <div class="pd-karma-strip">
+                    <div class="pd-karma-item">
+                        <span class="pd-karma-val">0</span>
+                        <span class="pd-karma-lbl">Karma</span>
+                    </div>
+                    <div class="pd-karma-div"></div>
+                    <div class="pd-karma-item">
+                        <span class="pd-karma-val" id="user-year">N/A</span>
+                        <span class="pd-karma-lbl">Year</span>
+                    </div>
                 </div>
-                <div class="dropdown-divider"></div>
-                <div class="dropdown-item"><span class="dropdown-icon">⚙️</span> Settings</div>
+                <div class="pd-divider"></div>
+                
+                <button class="pd-item" id="admin-panel-btn" style="display: none;">
+                    <div class="pd-ico">🛡️</div>
+                    Admin Dashboard
+                    <span class="pd-admin-badge">PRO</span>
+                </button>
+
+                <button class="pd-item pd-logout" id="dropdown-logout-btn">
+                    <div class="pd-ico"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div>
+                    Log out
+                </button>
             </div>
         </div>
     </header>
 
-    <aside id="side-drawer" class="side-drawer" style="overflow-y: auto; padding-bottom: 40px;">
-        <div class="drawer-content">
-            <h3>Departments</h3>
-            <ul class="category-list">
-                <li class="active">🏠 Home</li>
-                <li class="active">💻 BCA / IT</li>
-                <li>🏗️ Engineering</li>
-                <li>📊 MBA / Commerce</li>
-                <li>📚 Resource Vault (PDFs)</li>
-            </ul>
-            <hr style="border-color: var(--border-light); margin: 15px 0;">
-            <h3>Campus Life</h3>
-            <ul class="category-list">
-                <li>🍔 Canteen Reviews</li>
-                <li>📝 Exam Prep</li>
-                <li>🏀 Sports & Events</li>
-                <li>🔍 Lost & Found</li>
-                <li>💼 Placement Prep</li>
-            </ul>
-
-            <hr style="border-color: var(--border-light); margin: 25px 0 15px 0;">
-            
-            <div class="community-card" style="margin-bottom: 20px; background: rgba(0,0,0,0.15); padding: 15px; border-radius: 8px; border: 1px solid var(--border-light);">
-                <h4 style="margin-bottom: 10px; color: var(--text-main);">About Community</h4>
-                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">Welcome to your official university forum. Discuss campus life, share resources, and stay anonymous.</p>
-                <div class="stats" style="display: flex; gap: 20px;">
-                    <div><b style="color: var(--text-main);">12k</b><br><span style="color: var(--text-muted); font-size: 0.75rem;">Students</span></div>
-                    <div><b style="color: #22c55e;">450</b><br><span style="color: var(--text-muted); font-size: 0.75rem;">Online</span></div>
-                </div>
+    <aside id="side-drawer" class="sidebar">
+        <div class="sidebar-inner">
+            <div class="sb-section">
+                <div class="sb-label">Explore</div>
+                <ul class="sb-list">
+                    <li class="sb-item active"><span class="sb-emoji">🔥</span> Hot Posts</li>
+                    <li class="sb-item"><span class="sb-emoji">✨</span> New</li>
+                    <li class="sb-item"><span class="sb-emoji">🏆</span> Top All Time</li>
+                </ul>
             </div>
-
-            <div class="trending-card" style="background: rgba(0,0,0,0.15); padding: 15px; border-radius: 8px; border: 1px solid var(--border-light);">
-                <h4 style="margin-bottom: 10px; color: var(--text-main);">Highest point Leaders</h4>
-                <ol style="color: var(--text-muted); font-size: 0.85rem; padding-left: 20px; margin: 0;">
-                    <li style="margin-bottom: 8px;"><span style="color: var(--text-main);">u/Divyajyoti_mishra</span> (+2500)</li>
-                    <li style="margin-bottom: 8px;"><span style="color: var(--text-main);">u/Admin_Helper</span> (+1800)</li>
-                    <li><span style="color: var(--text-main);">u/LateNightCoder</span> (+1200)</li>
-                </ol>
+            <div class="sb-divider"></div>
+            <div class="sb-section">
+                <div class="sb-label">Departments</div>
+                <ul class="sb-list">
+                    <li class="sb-item"><span class="sb-emoji">💻</span> BCA / IT <span class="sb-count">12</span></li>
+                    <li class="sb-item"><span class="sb-emoji">🏗️</span> Engineering <span class="sb-count">8</span></li>
+                    <li class="sb-item"><span class="sb-emoji">📊</span> MBA / Commerce</li>
+                </ul>
+            </div>
+            <div class="sb-divider"></div>
+            <div class="sb-card">
+                <div class="sb-card-header"><span class="sb-card-ico">👋</span> Welcome!</div>
+                <p class="sb-card-desc">Your official university forum. Discuss campus life, share resources, and stay anonymous.</p>
+                <div class="sb-stats">
+                    <div class="sb-stat">
+                        <span class="sb-stat-val">1.2k</span>
+                        <span class="sb-stat-lbl">Students</span>
+                    </div>
+                    <div class="sb-stat">
+                        <span class="sb-stat-val online">42</span>
+                        <span class="sb-stat-lbl">Online</span>
+                    </div>
+                </div>
             </div>
         </div>
     </aside>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-    <div class="container main-layout" style="display: flex; gap: 20px; padding-top: 90px; max-width: 1100px; margin: 0 auto; justify-content: center;">
+    <main class="main">
         
-        <div id="create-post-page" style="display: none; grid-column: 1 / -1; max-width: 800px; margin: 0 auto; width: 100%;">
-            <div class="create-header">
-                <h2>Create post</h2>
-                <span class="draft-link">Drafts</span>
-            </div>
-
-            <div class="post-profile-selector">
-                <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" alt="Avatar">
-                <span>u/Divyajyoti_mishra</span>
-                <span style="font-size: 0.8rem; margin-left: 5px;">▼</span>
-            </div>
-
-            <div class="editor-container">
-                <div class="editor-tabs">
-                    <button class="tab active" data-target="text-tab">Text</button>
-                    <button class="tab" data-target="media-tab">Images & Video</button>
-                    <button class="tab" data-target="link-tab">Link</button>
-                    <button class="tab" data-target="poll-tab">Poll</button>
+        <div id="feed-container">
+            <div class="sort-bar">
+                <div class="sort-pills feed-sort">
+                    <button class="sort-btn active">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c2.67 0 4.33 2.17 4.33 4.5 0 2.33-1.66 3.5-3.33 4.5-.66.4-1 1-.1 1.5 1.35.75 3.1 1.5 3.1 3.5 0 2-1.67 4-5 4S6 18 6 16c0-2 1.67-2.5 3.1-3.5.9-.5.56-1.1-.1-1.5-1.67-1-3.33-2.17-3.33-4.5C5.67 4.17 7.33 2 10 2c0 2 1.5 3 2 3s2-1 2-3z"/></svg> Hot
+                    </button>
+                    <button class="sort-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> New
+                    </button>
+                    <button class="sort-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Top
+                    </button>
                 </div>
+            </div>
 
-                <div class="editor-body">
-                    <input type="text" id="new-post-title" class="title-input" placeholder="Title*" maxlength="300">
-                    <div class="char-counter" id="title-counter">0/300</div>
-                    <button class="add-tags-btn">Add tags</button>
+            <div class="feed" id="main-feed-list">
+                </div>
+        </div>
 
-                    <div id="text-tab" class="tab-content active">
-                        <div class="rich-toolbar">
-                            <button class="tool-btn" data-command="bold" title="Bold"><b>B</b></button>
-                            <button class="tool-btn" data-command="italic" title="Italic"><i>i</i></button>
-                            <button class="tool-btn" data-command="strikethrough" title="Strikethrough" style="text-decoration: line-through;">S</button>
-                            <button class="tool-btn" data-command="createLink" title="Insert Link">🔗</button>
-                            <div class="tool-divider"></div>
-                            <button class="tool-btn" data-command="insertUnorderedList" title="Bullet List"><b>⋮≡</b></button>
-                            <button class="tool-btn" data-command="insertOrderedList" title="Numbered List"><b>1.</b></button>
-                            <button class="tool-btn" data-command="formatBlock" data-value="blockquote" title="Quote"><b>”</b></button>
-                            <button class="tool-btn" data-command="formatBlock" data-value="pre" title="Code Block"><b>&lt;/&gt;</b></button>
-                        </div>
-                        <div id="editor-content" class="content-input rich-editor" contenteditable="true" placeholder="Text (optional)"></div>
+        <div id="create-post-page" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <button class="back-btn" id="cancel-post-btn" style="margin-bottom: 0;">← Back</button>
+                <a href="#" class="draft-link" style="color: var(--accent-bright); font-size: 0.9rem; text-decoration: none; font-weight: 600;">Saved Drafts</a>
+            </div>
+            
+            <div class="pf-card">
+                <div class="pf-hero" style="padding: 15px 28px;">
+                    <div class="pf-username">Create a new post</div>
+                </div>
+                
+                <div class="pf-fields">
+                    <div class="auth-tabs editor-tabs" style="margin-bottom: 10px;">
+                        <button class="auth-tab tab active" data-target="text-tab">Text</button>
+                        <button class="auth-tab tab" data-target="media-tab">Media</button>
+                        <button class="auth-tab tab" data-target="link-tab">Link</button>
+                        <button class="auth-tab tab" data-target="poll-tab">Poll</button>
                     </div>
 
-                    <div id="media-tab" class="tab-content">
-                        <div class="upload-placeholder" id="upload-box">
+                    <input type="text" id="new-post-title" class="pf-input" placeholder="Title*" maxlength="300">
+                    <div class="char-count" id="title-counter">0/300</div>
+
+                    <div id="text-tab" class="tab-content active" style="display: block;">
+                        <div class="rich-toolbar" style="display: flex; gap: 5px; margin-bottom: 10px; background: var(--bg-mid); padding: 5px; border-radius: var(--radius-sm); border: 1px solid var(--border-2);">
+                            <button class="btn-ghost tool-btn" data-command="bold" title="Bold" style="padding: 4px 8px; font-size: 0.8rem;"><b>B</b></button>
+                            <button class="btn-ghost tool-btn" data-command="italic" title="Italic" style="padding: 4px 8px; font-size: 0.8rem;"><i>i</i></button>
+                            <button class="btn-ghost tool-btn" data-command="strikethrough" title="Strikethrough" style="padding: 4px 8px; font-size: 0.8rem; text-decoration: line-through;">S</button>
+                            <button class="btn-ghost tool-btn" data-command="createLink" title="Link" style="padding: 4px 8px; font-size: 0.8rem;">🔗</button>
+                            <button class="btn-ghost tool-btn" data-command="insertUnorderedList" title="List" style="padding: 4px 8px; font-size: 0.8rem;"><b>⋮≡</b></button>
+                        </div>
+                        <div id="editor-content" class="pf-input rich-editor" contenteditable="true" style="min-height: 150px;" placeholder="Text (optional)"></div>
+                    </div>
+
+                    <div id="media-tab" class="tab-content" style="display: none;">
+                        <div class="pf-field" style="border: 2px dashed var(--border-2); padding: 30px; text-align: center; border-radius: var(--radius-md);">
                             <span style="font-size: 2rem;">☁️</span>
-                            <p id="upload-text">Drag and drop images or videos here</p>
+                            <p id="upload-text" style="color: var(--text-3); margin: 10px 0;">Drag and drop images or videos here</p>
                             <input type="file" id="real-file-input" accept="image/*,video/*" style="display: none;">
-                            <button class="btn-draft" id="custom-upload-btn">Upload</button>
+                            <button class="btn-ghost" id="custom-upload-btn">Browse Files</button>
                         </div>
                     </div>
 
-                    <div id="link-tab" class="tab-content">
-                        <input type="url" class="title-input" placeholder="URL" style="border-bottom: 1px solid var(--border-light); padding-bottom: 10px; margin-bottom: 15px;">
-                        <textarea class="content-input" placeholder="URL title (optional)" style="min-height: 100px;"></textarea>
+                    <div id="link-tab" class="tab-content" style="display: none;">
+                        <input type="url" class="pf-input" placeholder="URL" style="margin-bottom: 10px;">
+                        <textarea class="pf-input" placeholder="URL title (optional)" style="min-height: 80px;"></textarea>
                     </div>
 
-                    <div id="poll-tab" class="tab-content">
-                        <input type="text" class="title-input" placeholder="Option 1" style="border: 1px solid var(--border-light); padding: 10px; border-radius: 4px; margin-bottom: 10px;">
-                        <input type="text" class="title-input" placeholder="Option 2" style="border: 1px solid var(--border-light); padding: 10px; border-radius: 4px; margin-bottom: 10px;">
-                        <button class="btn-draft" style="width: 100%;">+ Add Option</button>
+                    <div id="poll-tab" class="tab-content" style="display: none;">
+                        <input type="text" class="pf-input" placeholder="Option 1" style="margin-bottom: 10px;">
+                        <input type="text" class="pf-input" placeholder="Option 2" style="margin-bottom: 10px;">
+                        <button class="btn-ghost" style="width: 100%;">+ Add Option</button>
                     </div>
                 </div>
 
-                <div class="editor-footer" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding-top: 15px;">
-                    <label style="display: flex; align-items: center; gap: 8px; color: var(--text-main); cursor: pointer; font-size: 0.95rem;">
-                        <input type="checkbox" id="anon-checkbox" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-indigo);">
+                <div class="pf-save-row" style="justify-content: space-between;">
+                    <label class="anon-check">
+                        <input type="checkbox" id="anon-checkbox">
+                        <div class="check-box"></div>
                         🕵️ Post Anonymously
                     </label>
-                    <div style="display: flex; gap: 10px; margin-left: auto;">
-                        <button class="btn-cancel" id="cancel-post-btn">Cancel</button>
-                        <button class="btn-draft" id="save-draft-btn">Save Draft</button>
-                        <button class="btn-post" id="publish-post-btn" disabled>Post</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-ghost" id="save-draft-btn">Save Draft</button>
+                        <button class="btn-submit" id="publish-post-btn" disabled>Publish Post</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="post-detail-page" style="display: none; grid-column: 1 / -1; max-width: 800px; margin: 0 auto; width: 100%; animation: fadeUp 0.3s ease;">
-            <button id="back-to-feed-btn" style="margin-bottom: 15px; padding: 8px 16px; border-radius: 20px; cursor: pointer; background: transparent; border: 1px solid var(--border-light); color: var(--text-main);">← Back to Feed</button>
-            <div id="single-post-container"></div>
+        <div id="post-detail-page" style="display: none;">
+            <button class="back-btn" id="back-to-feed-btn">← Back to Feed</button>
+            <div id="single-post-container" class="feed"></div>
             
-            <div class="comments-section" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-light);">
-                <h3>Comments</h3>
-                
-                <label style="display: flex; align-items: center; gap: 8px; margin-top: 10px; color: var(--text-main); cursor: pointer; font-size: 0.85rem;">
-                    <input type="checkbox" id="anon-comment-checkbox" style="width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent-indigo);">
-                    🕵️ Comment Anonymously
-                </label>
-                
-                <div style="display: flex; gap: 10px; margin-top: 10px; margin-bottom: 20px;">
-                    <input type="text" id="new-comment-input" placeholder="What are your thoughts?" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border-light); background: var(--bg-dark); color: var(--text-main);">
-                    <button id="add-comment-btn" class="btn-primary" style="padding: 0 20px;">Comment</button>
+            <div class="comments-section">
+                <div class="comments-header">
+                    <div class="comments-title">Comments</div>
+                    <label class="anon-check anon-sm">
+                        <input type="checkbox" id="anon-comment-checkbox">
+                        <div class="check-box sm"></div>
+                        Comment Anonymously
+                    </label>
                 </div>
-                
+                <div class="new-comment-box">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" class="comment-composer-avatar">
+                    <div class="comment-composer-body">
+                        <textarea id="new-comment-input" class="comment-textarea" placeholder="What are your thoughts?"></textarea>
+                        <div class="comment-composer-footer">
+                            <button class="btn-post-comment" id="add-comment-btn">Post Comment</button>
+                        </div>
+                    </div>
+                </div>
                 <div id="comments-list">
-                    <p style="color: var(--text-muted); font-size: 0.9rem;">No comments yet. Be the first to share your thoughts!</p>
+                    <div class="no-comments"><p>Loading comments...</p></div>
                 </div>
             </div>
         </div>
 
-        <div id="edit-profile-page" style="display: none; grid-column: 1 / -1; max-width: 600px; margin: 0 auto; width: 100%; animation: fadeUp 0.3s ease;">
-            <button id="back-from-edit-btn" style="margin-bottom: 15px; padding: 8px 16px; border-radius: 20px; cursor: pointer; background: transparent; border: 1px solid var(--border-light); color: var(--text-main);">← Back</button>
-            
-            <div style="background: var(--bg-card); padding: 30px; border-radius: 8px; border: 1px solid var(--border-light);">
-                <h2 style="color: var(--text-main); margin-bottom: 20px; text-align: center;">Edit Profile</h2>
+        <div id="edit-profile-page" style="display: none;">
+            <button class="back-btn" id="back-from-edit-btn">← Back to Feed</button>
+            <div class="pf-card">
+                <div class="pf-hero">
+                    <div class="pf-avatar-zone">
+                        <img id="edit-avatar-preview" src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" class="pf-avatar">
+                        <div class="pf-avatar-change" onclick="document.getElementById('profile-pic-upload').click()">📷</div>
+                        <input type="file" id="profile-pic-upload" accept="image/*" style="display: none;">
+                    </div>
+                    <div class="pf-hero-info">
+                        <div class="pf-username profile-username">Edit Profile</div>
+                        <div class="pf-email-lbl profile-email">Update your public identity</div>
+                    </div>
+                </div>
+                <div class="pf-fields">
+                    <div class="pf-field">
+                        <label class="pf-label">Course / Major</label>
+                        <input type="text" id="edit-course-input" class="pf-input" placeholder="e.g. BCA / Computer Science">
+                    </div>
+                    <div class="pf-field">
+                        <label class="pf-label">Year</label>
+                        <input type="text" id="edit-year-input" class="pf-input" placeholder="e.g. 3rd Year">
+                    </div>
+                </div>
+                <div class="pf-save-row">
+                    <span class="pf-save-msg" style="color: var(--text-3);">Changes update across the network.</span>
+                    <button class="btn-submit" id="save-full-profile-btn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div class="modal-backdrop" id="auth-modal">
+        <div class="modal auth-panel">
+            <div class="modal-header">
+                <div class="auth-brand">
+                    <div class="logo-icon"></div>
+                    <div>Join Uni<span class="logo-accent">Thread</span></div>
+                </div>
+                <button class="modal-close btn-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="auth-sub" id="auth-title">Enter your university email to continue.</p>
                 
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <img id="edit-avatar-preview" src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-indigo); margin-bottom: 15px;">
-                    <br>
-                    <input type="file" id="profile-pic-upload" accept="image/*" style="display: none;">
-                    <button class="btn-draft" onclick="document.getElementById('profile-pic-upload').click()">📷 Change Picture</button>
+                <div class="form-group input-group" style="display: flex; gap: 10px;">
+                    <input type="email" id="user-email" class="form-input" placeholder="student@youruniversity.edu">
+                    <button id="send-otp" class="btn-submit">Send OTP</button>
+                </div>
+                
+                <div id="otp-section" class="form-group" style="display:none; margin-top: 20px;">
+                    <input type="text" id="otp-code" class="form-input" placeholder="Enter 6-digit OTP" maxlength="6">
+                    <button id="verify-btn" class="btn-submit full" style="margin-top: 10px;">Verify & Enter</button>
                 </div>
 
-                <div style="margin-bottom: 15px;">
-                    <label style="color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 5px;">Course</label>
-                    <input type="text" id="edit-course-input" style="width: 100%; padding: 10px; border-radius: 4px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-light);">
+                <div id="profile-setup-section" style="display: none; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px;">
+                    <h3 style="color: var(--text-1); margin-bottom: 10px;">Step 3: Complete Profile</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <div class="input-prefix-wrap">
+                            <span class="input-prefix">u/</span>
+                            <input type="text" id="setup-username" class="form-input has-prefix" placeholder="hacker99">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Course / Major</label>
+                        <input type="text" id="setup-course" class="form-input" placeholder="e.g. BCA">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Year</label>
+                        <input type="text" id="setup-year" class="form-input" placeholder="e.g. 1st Year">
+                    </div>
+
+                    <button id="submit-profile-btn" class="btn-submit full">Submit Application</button>
                 </div>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <p style="font-size: 0.75rem; color: var(--text-3);">Only verified university domains are allowed.</p>
+            </div>
+        </div>
+    </div>
 
-                <div style="margin-bottom: 25px;">
-                    <label style="color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 5px;">Year</label>
-                    <input type="text" id="edit-year-input" style="width: 100%; padding: 10px; border-radius: 4px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-light);">
+    <div class="modal-backdrop" id="drafts-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="admin-title">📝 Your Saved Drafts</div>
+                <button class="modal-close" id="close-drafts-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                <div id="drafts-list-container">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="admin-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="admin-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Admin Dashboard
                 </div>
-
-                <button id="save-full-profile-btn" class="btn-primary" style="width: 100%; padding: 12px; border-radius: 4px; border: none; cursor: pointer;">Save Changes</button>
+                <button class="modal-close" id="close-admin-btn">&times;</button>
             </div>
-        </div>
-
-        <main class="feed" style="flex: 1; max-width: 700px;">
-            <div class="feed-sort">
-                <button class="active">Hot</button>
-                <button>New</button>
-                <button>Top</button>
-            </div>
-        </main>
-    </div>
-
-    <div id="auth-modal" class="modal-overlay" style="display:none;">
-        <div class="modal-content auth-card">
-            <h2 id="auth-title" style="margin-bottom: 10px;">Join UniThread</h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Enter your university email to continue.</p>
-            
-            <div class="input-group" style="display: flex; gap: 10px;">
-                <input type="email" id="user-email" placeholder="student@youruniversity.edu" style="flex: 1; margin: 0; padding: 10px; border-radius: 4px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-light);">
-                <button id="send-otp" class="btn-primary">Send OTP</button>
-            </div>
-            
-            <div id="otp-section" style="display:none; margin-top: 20px;">
-                <input type="text" id="otp-code" placeholder="Enter 6-digit OTP" maxlength="6" style="width: 100%; padding: 10px; border-radius: 4px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-light);">
-                <button id="verify-btn" class="btn-primary" style="width: 100%; margin-top: 10px; padding: 12px;">Verify & Enter</button>
-            </div>
-
-            <div id="profile-setup-section" style="display: none; margin-top: 20px; border-top: 1px solid var(--border-light); padding-top: 20px;">
-                <h3 style="color: var(--text-main); margin-bottom: 10px;">Step 3: Complete Profile</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Create your identity to join the waitlist.</p>
-
-                <label style="color: var(--text-main); font-size: 0.9rem; display: block; margin-bottom: 5px;">Username</label>
-                <input type="text" id="setup-username" placeholder="e.g. u/hacker99" style="width: 100%; padding: 10px; border-radius: 4px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-light); margin-bottom: 15px;">
-
-                <label style="color: var(--text-main); font-size: 0.9rem; display: block; margin-bottom: 5px;">Course / Major</label>
-                <input type="text" id="setup-course" placeholder="e.g. BCA / Computer Science" style="width: 100%; padding: 10px; border-radius: 4px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-light); margin-bottom: 15px;">
-
-                <label style="color: var(--text-main); font-size: 0.9rem; display: block; margin-bottom: 5px;">Year</label>
-                <input type="text" id="setup-year" placeholder="e.g. 1st Year" style="width: 100%; padding: 10px; border-radius: 4px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-light); margin-bottom: 20px;">
-
-                <button id="submit-profile-btn" class="btn-primary" style="width: 100%; padding: 12px;">Submit Application</button>
-            </div>
-
-            <p class="small-text" style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 20px;">Only verified university domains are allowed.</p>
-        </div>
-    </div>
-
-    <div id="profile-modal" class="modal-overlay" style="display:none;">
-        <div class="modal-content profile-card">
-            <button class="btn-close" style="position: absolute; top: 15px; right: 20px; background: transparent; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer;">&times;</button>
-            <div class="profile-header">
-                <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" alt="Profile Picture" class="profile-large-avatar">
-                <h2 class="profile-username">u/Divyajyoti_mishra</h2>
-                <p class="profile-email">codewizard@university.edu</p>
-                <span class="tag" style="margin-top: 10px; display: inline-block;">Verified Student ✓</span>
-            </div>
-            <div class="profile-details">
-                <div class="detail-item"><span class="detail-label">Course</span><span class="detail-value" id="user-course">BCA / IT</span></div>
-                <div class="detail-item"><span class="detail-label">Year</span><span class="detail-value" id="user-year">3rd Year</span></div>
-                <div class="detail-item"><span class="detail-label">Total points</span><span class="detail-value">2,500</span></div>
-                <div class="detail-item"><span class="detail-label">Joined</span><span class="detail-value">Aug 2023</span></div>
-            </div>
-            <div class="modal-actions" style="margin-top: 25px; display: flex; gap: 10px; width: 100%;">
-                <button id="edit-profile-btn" class="btn-draft" style="flex: 1;"><span style="margin-right: 5px;">👕</span> Edit your profile</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="drafts-modal" class="modal-overlay" style="display:none;">
-        <div class="modal-content auth-card" style="max-width: 600px;">
-            <button id="close-drafts-btn" class="btn-close" style="position: absolute; top: 15px; right: 20px; background: transparent; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer;">&times;</button>
-            <h2 style="margin-bottom: 20px; color: var(--text-main);">Your Saved Drafts</h2>
-            
-            <div id="drafts-list-container" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
-            </div>
-        </div>
-    </div>
-
-    <div id="admin-modal" class="modal-overlay" style="display:none;">
-        <div class="modal-content auth-card" style="max-width: 600px;">
-            <button class="btn-close" id="close-admin-btn" style="position: absolute; top: 15px; right: 20px; background: transparent; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer;">&times;</button>
-            <h2 style="margin-bottom: 20px; color: var(--text-main);">🛡️ Admin Dashboard</h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Review pending student applications.</p>
-            
-            <div id="pending-users-list" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
-                <p style="color: var(--text-muted);">Loading applications...</p>
+            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                <p class="modal-sub">Review pending student applications.</p>
+                <div id="pending-users-list">
+                    <div class="no-comments"><p>Loading applications...</p></div>
+                </div>
             </div>
         </div>
     </div>

@@ -971,3 +971,21 @@ if (pendingUsersList) {
         }
     });
 }
+// ==========================================
+// --- 🌙 LIGHT/DARK THEME TOGGLE LOGIC ---
+// ==========================================
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const htmlElement = document.documentElement;
+
+const savedTheme = localStorage.getItem('unithreadTheme') || 'dark';
+htmlElement.setAttribute('data-theme', savedTheme);
+
+if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+        const currentTheme = htmlElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        htmlElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('unithreadTheme', newTheme);
+    });
+}
