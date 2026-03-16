@@ -517,21 +517,39 @@ async function syncProfileFromCloud() {
 }
 
 const settingsBtn = document.getElementById('settings-btn');
+
 function openProfilePage(e) {
-    if(e) e.stopPropagation(); 
+    // Stop the click from closing the dropdown immediately and messing up the event
+    if(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    console.log("🛠️ DEBUG: Opening Edit Profile Page!");
+    
     if(profileDropdown) profileDropdown.classList.remove('open');
+    
     try {
         const savedProfile = JSON.parse(localStorage.getItem('uniProfile'));
         if (savedProfile) {
             if (editCourseInput) editCourseInput.value = savedProfile.course || '';
             if (editYearInput) editYearInput.value = savedProfile.year || '';
         }
-    } catch(err) {}
+    } catch(err) {
+        console.log("No profile data found in local storage");
+    }
+    
+    // Explicitly call our showPage function
     showPage('edit-profile-page');
 }
-if (viewProfileBtn) viewProfileBtn.addEventListener('click', openProfilePage);
-if (settingsBtn) settingsBtn.addEventListener('click', openProfilePage);
 
+// Ensure the listeners are explicitly attached
+if (viewProfileBtn) {
+    viewProfileBtn.addEventListener('click', openProfilePage);
+}
+if (settingsBtn) {
+    settingsBtn.addEventListener('click', openProfilePage);
+}
 if (profilePicUpload) {
     profilePicUpload.addEventListener('change', async (e) => {
         const file = e.target.files[0];
