@@ -45,7 +45,8 @@
             </div>
 
             <div id="profile-dropdown" class="profile-dropdown">
-                <div class="pd-identity" id="view-profile-btn" style="cursor: pointer;" onclick="forceOpenProfile()">
+                
+                <a href="javascript:void(0);" class="pd-identity" id="view-profile-btn" style="text-decoration: none;" onclick="forceOpenProfile(event)">
                     <div class="pd-identity-avatarwrap">
                         <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" class="pd-big-avatar" alt="Avatar">
                         <div class="pd-online-ring"></div>
@@ -54,7 +55,8 @@
                         <span class="pd-display-name profile-username">u/Guest</span>
                         <span class="pd-handle profile-email">Not logged in</span>
                     </div>
-                </div>
+                </a>
+                
                 <div class="pd-karma-strip">
                     <div class="pd-karma-item">
                         <span class="pd-karma-val">0</span>
@@ -68,21 +70,21 @@
                 </div>
                 <div class="pd-divider"></div>
                 
-                <button class="pd-item" id="settings-btn" onclick="forceOpenProfile()">
+                <a href="javascript:void(0);" class="pd-item" id="settings-btn" style="text-decoration: none;" onclick="forceOpenProfile(event)">
                     <div class="pd-ico"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
                     Edit Profile
-                </button>
+                </a>
 
-                <button class="pd-item" id="admin-panel-btn" style="display: none;">
+                <a href="javascript:void(0);" class="pd-item" id="admin-panel-btn" style="display: none; text-decoration: none;">
                     <div class="pd-ico">🛡️</div>
                     Admin Dashboard
                     <span class="pd-admin-badge">PRO</span>
-                </button>
+                </a>
 
-                <button class="pd-item pd-logout" id="dropdown-logout-btn">
+                <a href="javascript:void(0);" class="pd-item pd-logout" id="dropdown-logout-btn" style="text-decoration: none;" onclick="localStorage.clear(); window.location.reload();">
                     <div class="pd-ico"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div>
                     Log out
-                </button>
+                </a>
             </div>
         </div>
     </header>
@@ -242,7 +244,7 @@
         </div>
 
         <div id="edit-profile-page" style="display: none;">
-            <button class="back-btn" id="back-from-edit-btn" onclick="forceCloseProfile()">← Back to Feed</button>
+            <button class="back-btn" id="back-from-edit-btn" onclick="forceCloseProfile(event)">← Back to Feed</button>
             <div class="pf-card">
                 <div class="pf-hero">
                     <div class="pf-avatar-zone">
@@ -357,7 +359,15 @@
     </div>
 
     <script>
-        function forceOpenProfile() {
+        function forceOpenProfile(e) {
+            // STOP app.js from hearing this click and messing everything up!
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            console.log("🚀 HTML Override triggered!");
+
             // Instantly hide the dropdown menu
             const dropdown = document.getElementById('profile-dropdown');
             if (dropdown) dropdown.classList.remove('open');
@@ -370,7 +380,7 @@
             // Instantly show the profile page
             document.getElementById('edit-profile-page').style.display = 'block';
             
-            // Fill in the data
+            // Fill in the data safely
             try {
                 const profile = JSON.parse(localStorage.getItem('uniProfile'));
                 if (profile) {
@@ -379,15 +389,18 @@
                     if (cInput) cInput.value = profile.course || '';
                     if (yInput) yInput.value = profile.year || '';
                 }
-            } catch(e) {}
+            } catch(err) {
+                console.log("No profile data found.");
+            }
         }
 
-        function forceCloseProfile() {
+        function forceCloseProfile(e) {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
             document.getElementById('edit-profile-page').style.display = 'none';
             document.getElementById('feed-container').style.display = 'block';
         }
     </script>
 
-    <script src="app.js?v=1000"></script>
+    <script src="app.js?v=2000"></script>
 </body>
 </html>
