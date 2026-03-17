@@ -44,9 +44,10 @@
                 <div class="online-dot"></div>
             </div>
 
-            <div id="profile-dropdown" class="profile-dropdown">
+           
+           <div id="profile-dropdown" class="profile-dropdown">
                 
-                <div class="pd-identity" style="cursor: pointer;" onclick="document.getElementById('profile-dropdown').classList.remove('open'); document.getElementById('feed-container').style.display='none'; document.getElementById('create-post-page').style.display='none'; document.getElementById('post-detail-page').style.display='none'; document.getElementById('edit-profile-page').style.display='block';">
+                <div class="pd-identity" style="cursor: pointer;" onmousedown="openMyProfileNow()">
                     <div class="pd-identity-avatarwrap">
                         <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" class="pd-big-avatar" alt="Avatar">
                         <div class="pd-online-ring"></div>
@@ -70,7 +71,7 @@
                 </div>
                 <div class="pd-divider"></div>
                 
-                <button class="pd-item" onclick="document.getElementById('profile-dropdown').classList.remove('open'); document.getElementById('feed-container').style.display='none'; document.getElementById('create-post-page').style.display='none'; document.getElementById('post-detail-page').style.display='none'; document.getElementById('edit-profile-page').style.display='block';">
+                <button class="pd-item" onmousedown="openMyProfileNow()">
                     <div class="pd-ico"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
                     Edit Profile
                 </button>
@@ -81,7 +82,7 @@
                     <span class="pd-admin-badge">PRO</span>
                 </button>
 
-                <button class="pd-item pd-logout" onclick="localStorage.clear(); window.location.reload();">
+                <button class="pd-item pd-logout" onmousedown="localStorage.clear(); window.location.reload();">
                     <div class="pd-ico"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div>
                     Log out
                 </button>
@@ -401,5 +402,30 @@
     </script>
 
     <script src="app.js?v=2000"></script>
+    <script>
+        function openMyProfileNow() {
+            // 1. Instantly hide the dropdown
+            document.getElementById('profile-dropdown').classList.remove('open');
+            
+            // 2. Instantly hide the feed
+            document.getElementById('feed-container').style.display = 'none';
+            document.getElementById('create-post-page').style.display = 'none';
+            document.getElementById('post-detail-page').style.display = 'none';
+            
+            // 3. FORCE SHOW the profile
+            document.getElementById('edit-profile-page').style.display = 'block';
+            
+            // 4. Fill in the user's saved data safely
+            try {
+                const profile = JSON.parse(localStorage.getItem('uniProfile'));
+                if (profile) {
+                    const cInput = document.getElementById('edit-course-input');
+                    const yInput = document.getElementById('edit-year-input');
+                    if (cInput) cInput.value = profile.course || '';
+                    if (yInput) yInput.value = profile.year || '';
+                }
+            } catch(e) {}
+        }
+    </script>
 </body>
 </html>
