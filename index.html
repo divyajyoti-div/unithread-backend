@@ -34,7 +34,6 @@
             </div>
 
             <button class="btn-login" id="dropdown-login-btn">Log in</button>
-            <button class="btn-ghost" style="border-color: var(--accent); color: var(--accent-bright); margin-right: 10px;" onclick="document.getElementById('feed-container').style.display='none'; document.getElementById('create-post-page').style.display='none'; document.getElementById('post-detail-page').style.display='none'; document.getElementById('edit-profile-page').style.display='block';">⚙️ Setup Profile</button>
             <button class="btn-create" id="create-post-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 Create Post
@@ -47,7 +46,7 @@
 
             <div id="profile-dropdown" class="profile-dropdown">
                 
-                <a href="javascript:void(0);" class="pd-identity" id="view-profile-btn" style="text-decoration: none;" onclick="forceOpenProfile(event)">
+                <div class="pd-identity" style="cursor: pointer;" onclick="document.getElementById('profile-dropdown').classList.remove('open'); document.getElementById('feed-container').style.display='none'; document.getElementById('create-post-page').style.display='none'; document.getElementById('post-detail-page').style.display='none'; document.getElementById('edit-profile-page').style.display='block';">
                     <div class="pd-identity-avatarwrap">
                         <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=6366f1" class="pd-big-avatar" alt="Avatar">
                         <div class="pd-online-ring"></div>
@@ -56,7 +55,7 @@
                         <span class="pd-display-name profile-username">u/Guest</span>
                         <span class="pd-handle profile-email">Not logged in</span>
                     </div>
-                </a>
+                </div>
                 
                 <div class="pd-karma-strip">
                     <div class="pd-karma-item">
@@ -71,23 +70,22 @@
                 </div>
                 <div class="pd-divider"></div>
                 
-                <a href="javascript:void(0);" class="pd-item" id="settings-btn" style="text-decoration: none;" onclick="forceOpenProfile(event)">
+                <button class="pd-item" onclick="document.getElementById('profile-dropdown').classList.remove('open'); document.getElementById('feed-container').style.display='none'; document.getElementById('create-post-page').style.display='none'; document.getElementById('post-detail-page').style.display='none'; document.getElementById('edit-profile-page').style.display='block';">
                     <div class="pd-ico"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
                     Edit Profile
-                </a>
+                </button>
 
-                <a href="javascript:void(0);" class="pd-item" id="admin-panel-btn" style="display: none; text-decoration: none;">
+                <button class="pd-item" id="admin-panel-btn" style="display: none;">
                     <div class="pd-ico">🛡️</div>
                     Admin Dashboard
                     <span class="pd-admin-badge">PRO</span>
-                </a>
+                </button>
 
-                <a href="javascript:void(0);" class="pd-item pd-logout" id="dropdown-logout-btn" style="text-decoration: none;" onclick="localStorage.clear(); window.location.reload();">
+                <button class="pd-item pd-logout" onclick="localStorage.clear(); window.location.reload();">
                     <div class="pd-ico"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div>
                     Log out
-                </a>
+                </button>
             </div>
-        </div>
     </header>
 
     <aside id="side-drawer" class="sidebar">
